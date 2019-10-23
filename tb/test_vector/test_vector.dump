@@ -1,0 +1,32 @@
+
+test_vector/test_vector:     file format elf32-littleriscv
+
+
+Disassembly of section .text:
+
+00000000 <_start>:
+   0:	03000513          	li	a0,48
+   4:	0000006f          	j	4 <_start+0x4>
+   8:	0000                	unimp
+   a:	0000                	unimp
+   c:	0000                	unimp
+   e:	0000                	unimp
+  10:	0000                	unimp
+  12:	0000                	unimp
+  14:	0000                	unimp
+  16:	0000                	unimp
+  18:	0000                	unimp
+  1a:	0000                	unimp
+  1c:	0000                	unimp
+  1e:	0000                	unimp
+
+Disassembly of section .data:
+
+00000030 <msg>:
+  30:	6548                	flw	fa0,12(a0)
+  32:	6c6c                	flw	fa1,92(s0)
+  34:	6f57206f          	j	72f28 <_end+0x72eeb>
+  38:	6c72                	flw	fs8,28(sp)
+  3a:	0a64                	addi	s1,sp,284
+  3c:	00              	Address 0x000000000000003c is out of bounds.
+
