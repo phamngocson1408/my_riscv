@@ -7,6 +7,7 @@ module fetch
 	,input  	en_i
 	,input 		fet_pc_update_i
 	,input [31:0] 	fet_pc_i
+	,input  	com_inst_i
 
 	// Output
 	,output [31:0] 	fet_pc_o
@@ -22,7 +23,8 @@ always @(posedge clk_i) begin
 	else start_r <= #1 1;
 end
 
-wire [32:0] fet_pc_4_w = fet_pc_r + 4;
+wire [32:0] fet_pc_4_w = (com_inst_i) ? fet_pc_r + 2
+			: fet_pc_r + 4;
 
 parameter ROM_ORI = 'h0_0000;
 always @(posedge clk_i) begin

@@ -34,6 +34,7 @@ wire  		mem_model_inst_ow;
 wire  		dec_csr_inst_ow;
 wire  		dec_csr_imm_inst_ow;
 wire  		dec_muldiv_inst_ow;
+wire  		dec_com_inst_ow;
 wire  		dec_ready_ow;
 
 wire 		exe_reg_wr_en_ow;
@@ -161,6 +162,7 @@ fetch u_fetch
 	,.en_i (state_0)
 	,.fet_pc_update_i (exe_pc_update_ow)
 	,.fet_pc_i (exe_pc_ow)
+	,.com_inst_i (dec_com_inst_ow)
 	
 	// Output
 	,.fet_pc_o (fet_pc_ow)
@@ -200,6 +202,7 @@ decode u_decode
 	,.dec_csr_inst_o (dec_csr_inst_ow)
 	,.dec_csr_imm_inst_o (dec_csr_imm_inst_ow)
 	,.dec_muldiv_inst_o (dec_muldiv_inst_ow)
+	,.dec_com_inst_o (dec_com_inst_ow)
 	,.dec_ready_o (dec_ready_ow)
 );
 
@@ -229,6 +232,7 @@ execute u_execute
 	,.csr_inst_i (dec_csr_inst_ow)
 	,.csr_imm_inst_i (dec_csr_imm_inst_ow)
 	,.muldiv_inst_i (dec_muldiv_inst_ow)
+	,.com_inst_i (dec_com_inst_ow)
 	,.exe_csr_data_i (csr_data_ow)
 	,.exe_csr_addr_i (dec_csr_addr_ow)
 	

@@ -8,7 +8,7 @@ int fact2 (int n){
 }
 
 int main() {
-	int pram = 50;
+	int pram = 5;
 	int a = fact(pram);	
 	int i;
 	int c = 1;

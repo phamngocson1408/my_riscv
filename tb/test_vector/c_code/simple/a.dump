@@ -78,7 +78,7 @@ Disassembly of section .text:
  100:	00112e23          	sw	ra,28(sp)
  104:	00812c23          	sw	s0,24(sp)
  108:	02010413          	addi	s0,sp,32
- 10c:	03200793          	li	a5,50
+ 10c:	00500793          	li	a5,5
  110:	fef42223          	sw	a5,-28(s0)
  114:	fe442503          	lw	a0,-28(s0)
  118:	f6dff0ef          	jal	ra,84 <fact>

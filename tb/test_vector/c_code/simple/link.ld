@@ -9,7 +9,7 @@ SECTIONS
  ENTRY( _start )
  PROVIDE (_stack_top = ORIGIN(ram) + LENGTH(ram));
  /* text: test code section */
- /*. = 0x0000;*/
+ . = 0x0000;
  .text : { *(.text) } > rom
  /* data: Initialized data segment */
  .data : { *(.data) } > rom

@@ -65,3 +65,36 @@
 `define DIVU	8'h95
 `define REM	8'h96
 `define REMU	8'h97
+
+`define CADDI	8'ha0
+`define CADDI16SP	8'ha1
+`define CADDI4SPN	8'ha2
+`define CSLLI	8'ha3
+`define CSRLI	8'ha4
+`define CSRAI	8'ha5
+`define CANDI	8'ha6
+
+`define CMV	8'ha7
+`define CADD	8'ha8
+`define CAND	8'ha9
+`define COR	8'haa
+`define CXOR	8'hab
+`define CSUB	8'hac
+
+`define CNOP	8'had
+
+`define CLI	8'hae
+`define CLUI	8'haf
+
+
+`define CLWSP	8'hb0
+`define CSWSP	8'hb1
+`define CLW	8'hb2
+`define CSW	8'hb3
+
+`define CJ	8'hb4
+`define CJAL	8'hb5
+`define CJR	8'hb6
+`define CJALR	8'hb7
+`define CBEQZ	8'hb8
+`define CBNEZ	8'hb9

@@ -29,7 +29,8 @@ reg [7:0] RAM[0:RAM_LEN];
 integer i;
 
 initial begin
-	$readmemh("/home/pnson/tmp/RISCV/rocket-tools/riscv-tests/isa/rv32um-p-remu.hex", ROM);
+	$readmemh("/home/pnson/tmp/RISCV/my_riscv/tb/test_vector/c_code/simple/a.hex", ROM);
+//	$readmemh("/home/pnson/tmp/RISCV/rocket-tools/riscv-tests/isa/rv32uc-p-rvc.hex", RAM);
 	for ( i = 0 ; i < RAM_LEN ; i = i+1 )
 		RAM[i] = 32'h00;
 end
@@ -58,7 +59,8 @@ wire [31:0] rom_addr_1 = rom_addr_i + 1;
 wire [31:0] rom_addr_2 = rom_addr_i + 2;
 wire [31:0] rom_addr_3 = rom_addr_i + 3;
 
-wire [31:0] rom_data_o = (rom_addr_i == 32'h00) ? {32'h04c0006f} : (!rst_i) ? {ROM[rom_addr_3], ROM[rom_addr_2], ROM[rom_addr_1], ROM[rom_addr_i]} : 32'h00;
+//wire [31:0] rom_data_o = (rom_addr_i == 32'h00) ? {32'h01174081} : (!rst_i) ? {ROM[rom_addr_3], ROM[rom_addr_2], ROM[rom_addr_1], ROM[rom_addr_i]} : 32'h00;
+wire [31:0] rom_data_o = (!rst_i) ? {ROM[rom_addr_3], ROM[rom_addr_2], ROM[rom_addr_1], ROM[rom_addr_i]} : 32'h00;
 
 wire [31:0] ram_rd_data_o = (!rst_i && ram_rd_en_i) ? {RAM[ram_rd_addr_3], RAM[ram_rd_addr_2], RAM[ram_rd_addr_1], RAM[ram_rd_addr_w]} : 32'h00;
 

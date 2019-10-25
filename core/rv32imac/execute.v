@@ -22,6 +22,7 @@ module execute
 	,input  	csr_inst_i
 	,input  	csr_imm_inst_i
 	,input  	muldiv_inst_i
+	,input  	com_inst_i
 	,input [31:0] 	exe_csr_data_i
 	,input [11:0] 	exe_csr_addr_i
 
@@ -82,6 +83,7 @@ wire [31:0] or_w = exe_reg1_data_i | reg2_data_in_w;
 wire [31:0] and_w = exe_reg1_data_i & reg2_data_in_w;
 wire [31:0] sll_w = exe_reg1_data_i << reg2_data_in_w[4:0];
 wire [31:0] srl_w = exe_reg1_data_i >> reg2_data_in_w[4:0];
+wire [31:0] sra_w = $signed(exe_reg1_data_i) >>> reg2_data_in_w[4:0];
 wire [31:0] sub_w = exe_reg1_data_i - reg2_data_in_w;
 
 //
@@ -95,22 +97,32 @@ always @(posedge clk_i) begin
 		reg_addr_or <= #1 5'h0;
 	end
 	else if (en_i) begin
-	if (lui_inst_i) begin 				// LUI
+	if (exe_inst_i == `LUI | exe_inst_i == `CLUI | exe_inst_i == `CLI) begin 	// LUI
 		reg_wr_or <= #1 1;
 		reg_data_or <= #1 exe_imm_data_i;
 		reg_addr_or <= #1 exe_reg_dr_i;
 	end
-	else if (auipc_inst_i) begin 				// AUIPC
+	else if (exe_inst_i == `AUIPC) begin 				// AUIPC
 		reg_wr_or <= #1 1;
 		reg_data_or <= #1 pc_w;
 		reg_addr_or <= #1 exe_reg_dr_i;
 	end
-	else if (jal_inst_i) begin 				// JAL
+	else if (exe_inst_i == `JAL) begin 				// JAL
 		reg_wr_or <= #1 1;
 		reg_data_or <= #1 exe_pc_i + 4;
 		reg_addr_or <= #1 exe_reg_dr_i;
 	end
-	else if (jalr_inst_i) begin 				// JALR
+	else if (exe_inst_i == `CJAL) begin 				// CJAL
+		reg_wr_or <= #1 1;
+		reg_data_or <= #1 exe_pc_i + 2;
+		reg_addr_or <= #1 exe_reg_dr_i;
+	end
+	else if (exe_inst_i == `CJALR) begin 				// CJALR
+		reg_wr_or <= #1 1;
+		reg_data_or <= #1 exe_pc_i + 2;
+		reg_addr_or <= #1 exe_reg_dr_i;
+	end
+	else if (exe_inst_i == `JALR) begin 				// JALR
 		reg_wr_or <= #1 1;
 		reg_data_or <= #1 {jalr_reg_data_ow[31:1], 1'h0};
 		reg_addr_or <= #1 exe_reg_dr_i;
@@ -125,12 +137,17 @@ always @(posedge clk_i) begin
 		reg_data_or <= #1 {{16{exe_mem_ld_data_i[7]}}, exe_mem_ld_data_i[15:0]};
 		reg_addr_or <= #1 exe_reg_dr_i;
 	end
-	else if (exe_inst_i == `LW) begin				// LW
+	else if (exe_inst_i == `LW | exe_inst_i == `CLWSP | exe_inst_i == `CLW) begin	// LW
 		reg_wr_or <= #1 1;
 		reg_data_or <= #1 exe_mem_ld_data_i[31:0];
 		reg_addr_or <= #1 exe_reg_dr_i;
 	end
-	else if (exe_inst_i == `ADDI | exe_inst_i == `ADD) begin	// ADDI | ADD
+	else if (exe_inst_i == `CMV) begin	// CMV
+		reg_wr_or <= #1 1;
+		reg_data_or <= #1 exe_reg2_data_i;
+		reg_addr_or <= #1 exe_reg_dr_i;
+	end
+	else if (exe_inst_i == `ADDI | exe_inst_i == `ADD | exe_inst_i == `CADDI | exe_inst_i == `CADDI16SP | exe_inst_i == `CADDI4SPN | exe_inst_i == `CADD) begin	// ADDI | ADD
 		reg_wr_or <= #1 1;
 		reg_data_or <= #1 add_w;
 		reg_addr_or <= #1 exe_reg_dr_i;
@@ -140,32 +157,37 @@ always @(posedge clk_i) begin
 		reg_data_or <= #1 {31'h00, slt_w};
 		reg_addr_or <= #1 exe_reg_dr_i;
 	end
-	else if (exe_inst_i == `XORI | exe_inst_i == `XOR) begin	// XORI | XOR
+	else if (exe_inst_i == `XORI | exe_inst_i == `XOR | exe_inst_i == `CXOR) begin	// XORI | XOR
 		reg_wr_or <= #1 1;
 		reg_data_or <= #1 xor_w;
 		reg_addr_or <= #1 exe_reg_dr_i;
 	end
-	else if (exe_inst_i == `ORI | exe_inst_i == `OR) begin		// ORI | OR
+	else if (exe_inst_i == `ORI | exe_inst_i == `OR | exe_inst_i == `COR) begin		// ORI | OR
 		reg_wr_or <= #1 1;
 		reg_data_or <= #1 or_w;
 		reg_addr_or <= #1 exe_reg_dr_i;
 	end
-	else if (exe_inst_i == `ANDI | exe_inst_i == `AND) begin	// ANDI | AND
+	else if (exe_inst_i == `ANDI | exe_inst_i == `AND | exe_inst_i == `CANDI | exe_inst_i == `CAND) begin	// ANDI | AND
 		reg_wr_or <= #1 1;
 		reg_data_or <= #1 and_w;
 		reg_addr_or <= #1 exe_reg_dr_i;
 	end
-	else if (exe_inst_i == `SLLI | exe_inst_i == `SLL) begin	// SLLI | SLL
+	else if (exe_inst_i == `SLLI | exe_inst_i == `SLL | exe_inst_i == `CSLLI) begin	// SLLI | SLL
 		reg_wr_or <= #1 1;
 		reg_data_or <= #1 sll_w;
 		reg_addr_or <= #1 exe_reg_dr_i;
 	end
-	else if (exe_inst_i == `SRLI | exe_inst_i == `SRL | exe_inst_i == `SRAI | exe_inst_i == `SRA) begin	// SRLI | SRL
+	else if (exe_inst_i == `SRLI | exe_inst_i == `SRL | exe_inst_i == `CSRLI) begin	// SRLI | SRL
 		reg_wr_or <= #1 1;
 		reg_data_or <= #1 srl_w;
 		reg_addr_or <= #1 exe_reg_dr_i;
 	end
-	else if (exe_inst_i == `SUB) begin				// SUB
+	else if (exe_inst_i == `SRAI | exe_inst_i == `SRA | exe_inst_i == `CSRAI) begin	// SRAI | SRA
+		reg_wr_or <= #1 1;
+		reg_data_or <= #1 sra_w;
+		reg_addr_or <= #1 exe_reg_dr_i;
+	end
+	else if (exe_inst_i == `SUB | exe_inst_i == `CSUB) begin				// SUB
 		reg_wr_or <= #1 1;
 		reg_data_or <= #1 sub_w;
 		reg_addr_or <= #1 exe_reg_dr_i;
@@ -257,7 +279,7 @@ always @(posedge clk_i) begin
 	end
 	else if (en_i) begin
 	if (con_br_inst_i) begin 
-		if (exe_inst_i == `BEQ) begin		// BEQ
+		if (exe_inst_i == `BEQ | exe_inst_i == `CBEQZ) begin		// BEQ | CBEQZ
 			if (exe_reg1_data_i == exe_reg2_data_i) begin
 				pc_r <= #1 pc_w[31:0];
 				pc_update_r <= #1 1;
@@ -267,7 +289,7 @@ always @(posedge clk_i) begin
 				pc_update_r <= #1 0;
 			end
 		end
-		if (exe_inst_i == `BNE) begin		// BNE
+		if (exe_inst_i == `BNE | exe_inst_i == `CBNEZ) begin		// BNE | CBNEZ
 			if (exe_reg1_data_i != exe_reg2_data_i) begin
 				pc_r <= #1 pc_w[31:0];
 				pc_update_r <= #1 1;
@@ -298,12 +320,16 @@ always @(posedge clk_i) begin
 			end
 		end
 	end
-	else if (exe_inst_i == `JAL) begin
+	else if (exe_inst_i == `JAL | exe_inst_i == `CJ | exe_inst_i == `CJAL) begin
 		pc_r <= #1 pc_w[31:0];
 		pc_update_r <= #1 1;
 	end
 	else if (exe_inst_i == `JALR) begin
 		pc_r <= #1 jalr_reg_data_ow;
+		pc_update_r <= #1 1;
+	end
+	else if (exe_inst_i == `CJR | exe_inst_i == `CJALR) begin		// CJR | CJALR
+		pc_r <= #1 exe_reg1_data_i;
 		pc_update_r <= #1 1;
 	end
 	else begin
@@ -334,7 +360,7 @@ always @(posedge clk_i) begin
 		mem_data_or <= #1 {16'h00, exe_reg2_data_i[15:0]};
 		mem_addr_r <= #1 mem_addr_w;
 	end
-	else if (exe_inst_i == `SW) begin					// SW
+	else if (exe_inst_i == `SW | exe_inst_i == `CSWSP | exe_inst_i == `CSW) begin		// SW
 		mem_wr_en_r <= #1 1;
 		mem_data_or <= #1 exe_reg2_data_i;
 		mem_addr_r <= #1 mem_addr_w;
