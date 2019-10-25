@@ -18,5 +18,5 @@ all: $(TAR_DIR)/*.s
 	${CC} ${OPTS}  $< -o $(TAR_DIR)/test_vector
 	elf2hex 4 32768 test_vector/test_vector > test_vector/test_vector.hex
 	riscv32-unknown-elf-objdump --disassemble-all --disassemble-zeroes test_vector/test_vector > test_vector/test_vector.dump
-	vcs -full64 -debug_all -file RUN.cmd
+	vcs -full64 -debug_all +warn=noRWSI -file RUN.cmd
 	./simv

@@ -5,45 +5,67 @@ a.out:     file format elf32-littleriscv
 Disassembly of section .text:
 
 00000000 <_start>:
-   0:	00000093          	li	ra,0
-   4:	00000113          	li	sp,0
-   8:	00000193          	li	gp,0
-   c:	00000213          	li	tp,0
-  10:	00000293          	li	t0,0
-  14:	00000313          	li	t1,0
-  18:	00000393          	li	t2,0
-  1c:	00000413          	li	s0,0
-  20:	00000493          	li	s1,0
-  24:	00000513          	li	a0,0
-  28:	00000593          	li	a1,0
-  2c:	00000613          	li	a2,0
-  30:	00000693          	li	a3,0
-  34:	00000713          	li	a4,0
-  38:	00000793          	li	a5,0
-  3c:	00000813          	li	a6,0
-  40:	00000893          	li	a7,0
-  44:	00000913          	li	s2,0
-  48:	00000993          	li	s3,0
-  4c:	00000a13          	li	s4,0
-  50:	00000a93          	li	s5,0
-  54:	00000b13          	li	s6,0
-  58:	00000b93          	li	s7,0
-  5c:	00000c13          	li	s8,0
-  60:	00000c93          	li	s9,0
-  64:	00000d13          	li	s10,0
-  68:	00000d93          	li	s11,0
-  6c:	00000e13          	li	t3,0
-  70:	00000e93          	li	t4,0
-  74:	00000f13          	li	t5,0
-  78:	00000f93          	li	t6,0
-  7c:	0040006f          	j	80 <main>
+   0:	4081                	li	ra,0
+   2:	4101                	li	sp,0
+   4:	4181                	li	gp,0
+   6:	4201                	li	tp,0
+   8:	4281                	li	t0,0
+   a:	4301                	li	t1,0
+   c:	4381                	li	t2,0
+   e:	4401                	li	s0,0
+  10:	4481                	li	s1,0
+  12:	4501                	li	a0,0
+  14:	4581                	li	a1,0
+  16:	4601                	li	a2,0
+  18:	4681                	li	a3,0
+  1a:	4701                	li	a4,0
+  1c:	4781                	li	a5,0
+  1e:	4801                	li	a6,0
+  20:	4881                	li	a7,0
+  22:	4901                	li	s2,0
+  24:	4981                	li	s3,0
+  26:	4a01                	li	s4,0
+  28:	4a81                	li	s5,0
+  2a:	4b01                	li	s6,0
+  2c:	4b81                	li	s7,0
+  2e:	4c01                	li	s8,0
+  30:	4c81                	li	s9,0
+  32:	4d01                	li	s10,0
+  34:	4d81                	li	s11,0
+  36:	4e01                	li	t3,0
+  38:	4e81                	li	t4,0
+  3a:	4f01                	li	t5,0
+  3c:	4f81                	li	t6,0
+  3e:	0420006f          	j	80 <main>
+	...
 
 00000080 <main>:
-  80:	00100093          	li	ra,1
-  84:	00300113          	li	sp,3
-  88:	0020a1b3          	slt	gp,ra,sp
-  8c:	0020b1b3          	sltu	gp,ra,sp
-  90:	0020c1b3          	xor	gp,ra,sp
-  94:	0020e1b3          	or	gp,ra,sp
-  98:	0020f1b3          	and	gp,ra,sp
+  80:	05d1                	addi	a1,a1,20
+  82:	05d1                	addi	a1,a1,20
+  84:	0109                	addi	sp,sp,2
+  86:	00b10093          	addi	ra,sp,11
+  8a:	058a                	slli	a1,a1,0x2
+  8c:	8189                	srli	a1,a1,0x2
+  8e:	8585                	srai	a1,a1,0x1
+  90:	8991                	andi	a1,a1,4
+  92:	00b00533          	add	a0,zero,a1
+  96:	952e                	add	a0,a0,a1
+  98:	8d0d                	sub	a0,a0,a1
+  9a:	00000013          	nop
+  9e:	8d0d                	sub	a0,a0,a1
+  a0:	00400513          	li	a0,4
+  a4:	6591                	lui	a1,0x4
+  a6:	4592                	lw	a1,4(sp)
+  a8:	c22a                	sw	a0,4(sp)
+  aa:	4592                	lw	a1,4(sp)
+  ac:	404c                	lw	a1,4(s0)
+  ae:	c048                	sw	a0,4(s0)
+  b0:	404c                	lw	a1,4(s0)
+  b2:	f59ff06f          	j	a <_start+0xa>
+  b6:	f55ff0ef          	jal	ra,a <_start+0xa>
+  ba:	00050067          	jr	a0
+  be:	00051463          	bnez	a0,c6 <main+0x46>
+  c2:	f47ff06f          	j	8 <_start+0x8>
+  c6:	00050463          	beqz	a0,ce <main+0x4e>
+  ca:	f3fff06f          	j	8 <_start+0x8>
 	...

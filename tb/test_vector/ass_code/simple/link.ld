@@ -1,5 +1,5 @@
  OUTPUT_ARCH( "riscv" )
- ENTRY( _start )
+ ENTRY( _start ) 
  SECTIONS
  {
  /* text: test code section */
