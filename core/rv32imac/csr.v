@@ -1,16 +1,22 @@
 `timescale 1ns / 10ps
+`include "inst_def.v"
 module csr
 (
 	// Input
 	 input rst_i
 	,input clk_i
-	,input [11:0] csr_addr_i
-	,input csr_wr_en_i
-	,input [31:0] csr_data_i
+	,input [11:0] 	csr_addr_i
+	,input 		csr_wr_en_i
+	,input [31:0] 	csr_data_i
+	,input [7:0] 	csr_inst_i
 	
 	// Output
-	,output [31:0] csr_data_o
+	,output [31:0] 	csr_data_o
 );
+
+// Input CSR instructions
+wire ecall_inst_w = (csr_inst_i == `ECALL);
+wire mret_inst_w = (csr_inst_i == `MRET);
 
 // Supervisor Trap Setup
 wire stvec_w 	= csr_addr_i == 12'h105;
@@ -30,12 +36,12 @@ wire misa_w 	= csr_addr_i == 12'h301;
 wire medeleg_w 	= csr_addr_i == 12'h302;
 wire mideleg_w 	= csr_addr_i == 12'h303;
 wire mie_w 	= csr_addr_i == 12'h304;
-wire mtvec_w 	= csr_addr_i == 12'h305;
+wire mtvec_w 	= (csr_addr_i == 12'h305) | ecall_inst_w;
 wire mcounteren_w 	= csr_addr_i == 12'h306;
 
 // Machine Trap Handling
 wire mscratch_w 	= csr_addr_i == 12'h340;
-wire mepc_w 	= csr_addr_i == 12'h341;
+wire mepc_w 	= (csr_addr_i == 12'h341) | mret_inst_w;
 wire mcause_w 	= csr_addr_i == 12'h342;
 wire mtval_w 	= csr_addr_i == 12'h343;
 wire mip_w 	= csr_addr_i == 12'h344;
@@ -342,7 +348,6 @@ always @(posedge clk_i) begin
 		
 		mscratch_r 	<= #1 32'h00;
 		mepc_r     	<= #1 32'h00; 
-		mcause_r   	<= #1 32'h00;
 		mtval_r    	<= #1 32'h00;
 		mip_r      	<= #1 32'h00;
 		
@@ -488,7 +493,7 @@ always @(posedge clk_i) begin
 		else if (mtvec_w 		) mtvec_r    	<= #1 csr_data_i;   	
 //		else if (mcounteren_w 		) mcounteren_r	<= #1 csr_data_i;   
 //		else if (mscratch_w 		) mscratch_r 	<= #1 csr_data_i;
-//		else if (mepc_w 		) mepc_r     	<= #1 csr_data_i;
+		else if (mepc_w 		) mepc_r     	<= #1 csr_data_i;
 //		else if (mcause_w 		) mcause_r   	<= #1 csr_data_i;
 //		else if (mtval_w 		) mtval_r    	<= #1 csr_data_i;
 //		else if (mip_w 			) mip_r	     	<= #1 csr_data_i;
@@ -769,6 +774,14 @@ wire [31:0] csr_data_o =  (stvec_w	) ? stvec_r
 			: (dscratch1_w 		) ? dscratch1_r	
 
 			: 32'h00;
+
+//----------------------------------------------------------------------------------
+// Write mcause
+//----------------------------------------------------------------------------------
+always @(posedge clk_i) begin
+	if (rst_i) mcause_r <= #1 32'd00;
+	else if (ecall_inst_w) mcause_r <= #1 11;
+end
 
 // For debug
 reg [63:0] csr_name_r;

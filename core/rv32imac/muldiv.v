@@ -6,7 +6,6 @@ module muldiv
 	 input rst_i
 	,input clk_i
 	,input [7:0]	inst_i
-	,input muldiv_inst_i
 	,input [31:0]	reg1_data_i
 	,input [31:0]	reg2_data_i
 

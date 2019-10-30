@@ -21,19 +21,6 @@ wire [4:0] 	dec_reg_dr_ow;
 wire [4:0]	dec_reg_sr1_ow;
 wire [4:0]	dec_reg_sr2_ow;
 wire [31:0] 	dec_imm_data_ow;
-wire  		lui_inst_ow;
-wire  		auipc_inst_ow;
-wire  		jal_inst_ow;
-wire  		jalr_inst_ow;
-wire  		con_br_inst_ow;
-wire  		mem_ld_inst_ow;
-wire  		mem_st_inst_ow;
-wire  		int_reg_imm_inst_ow;
-wire  		int_reg_reg_inst_ow;
-wire  		mem_model_inst_ow;
-wire  		dec_csr_inst_ow;
-wire  		dec_csr_imm_inst_ow;
-wire  		dec_muldiv_inst_ow;
 wire  		dec_com_inst_ow;
 wire  		dec_ready_ow;
 
@@ -145,6 +132,7 @@ csr u_csr
 	,.csr_addr_i (dec_csr_addr_ow)
 	,.csr_wr_en_i (wrbk_csr_wr_en_ow)
 	,.csr_data_i (wrbk_csr_data_ow)
+	,.csr_inst_i (dec_inst_ow)
 
 	// Output
 	,.csr_data_o (csr_data_ow)
@@ -189,20 +177,9 @@ decode u_decode
 	,.dec_reg_sr2_o (dec_reg_sr2_ow)
 	,.dec_imm_data_o (dec_imm_data_ow)
 	,.dec_csr_addr_o (dec_csr_addr_ow)
-	,.dec_lui_inst_o (lui_inst_ow)
-	,.dec_auipc_inst_o (auipc_inst_ow)
-	,.dec_jal_inst_o (jal_inst_ow)
-	,.dec_jalr_inst_o (jalr_inst_ow)
-	,.dec_con_br_inst_o (con_br_inst_ow)
-	,.dec_mem_ld_inst_o (mem_ld_inst_ow)
-	,.dec_mem_st_inst_o (mem_st_inst_ow)
-	,.dec_int_reg_imm_inst_o (int_reg_imm_inst_ow)
-	,.dec_int_reg_reg_inst_o (int_reg_reg_inst_ow)
-	,.dec_mem_model_inst_o (mem_model_inst_ow)
-	,.dec_csr_inst_o (dec_csr_inst_ow)
-	,.dec_csr_imm_inst_o (dec_csr_imm_inst_ow)
-	,.dec_muldiv_inst_o (dec_muldiv_inst_ow)
+
 	,.dec_com_inst_o (dec_com_inst_ow)
+
 	,.dec_ready_o (dec_ready_ow)
 );
 
@@ -219,28 +196,11 @@ execute u_execute
 	,.exe_inst_i (dec_inst_ow)
 	,.exe_reg_dr_i (dec_reg_dr_ow)
 	,.exe_imm_data_i (dec_imm_data_ow)
-	,.lui_inst_i (lui_inst_ow)
-	,.auipc_inst_i (auipc_inst_ow)
-	,.jal_inst_i (jal_inst_ow)
-	,.jalr_inst_i (jalr_inst_ow)
-	,.con_br_inst_i (con_br_inst_ow)
-	,.mem_ld_inst_i (mem_ld_inst_ow)
-	,.mem_st_inst_i (mem_st_inst_ow)
-	,.int_reg_imm_inst_i (int_reg_imm_inst_ow)
-	,.int_reg_reg_inst_i (int_reg_reg_inst_ow)
-	,.mem_model_inst_i (mem_model_inst_ow)
-	,.csr_inst_i (dec_csr_inst_ow)
-	,.csr_imm_inst_i (dec_csr_imm_inst_ow)
-	,.muldiv_inst_i (dec_muldiv_inst_ow)
-	,.com_inst_i (dec_com_inst_ow)
 	,.exe_csr_data_i (csr_data_ow)
 	,.exe_csr_addr_i (dec_csr_addr_ow)
-	
 	,.exe_mem_data_i (mem_data_ow)
-	
 	,.exe_reg1_data_i (reg1_data_ow)
 	,.exe_reg2_data_i (reg2_data_ow)
-	
 	,.exe_pc_i (fet_pc_ow)
 
 	// Output
@@ -262,6 +222,7 @@ execute u_execute
 	,.exe_csr_wr_en_o (exe_csr_wr_en_ow)
 	,.exe_csr_data_o (exe_csr_data_ow)
 	,.exe_csr_addr_o (exe_csr_addr_ow)
+
 	,.exe_ready_o (exe_ready_ow)
 );
 

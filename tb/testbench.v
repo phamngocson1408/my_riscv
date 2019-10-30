@@ -52,7 +52,6 @@ core u_core
 always @(posedge CLK) begin
 	if ({testbench.u_core.u_decode.dec_inst_i[31:0]} == 32'hc0001073) begin
 		$display ("Pass----------------\n");
-		$finish;
 	end
 end
 initial begin

@@ -14,20 +14,9 @@ module decode
 	,output [4:0]	dec_reg_sr2_o
 	,output [31:0] 	dec_imm_data_o
 	,output [11:0] 	dec_csr_addr_o
-	,output  	dec_lui_inst_o
-	,output  	dec_auipc_inst_o
-	,output  	dec_jal_inst_o
-	,output  	dec_jalr_inst_o
-	,output  	dec_con_br_inst_o
-	,output  	dec_mem_ld_inst_o
-	,output  	dec_mem_st_inst_o
-	,output  	dec_int_reg_imm_inst_o
-	,output  	dec_int_reg_reg_inst_o
-	,output  	dec_mem_model_inst_o
-	,output  	dec_csr_inst_o
-	,output  	dec_csr_imm_inst_o
-	,output  	dec_muldiv_inst_o
+
 	,output  	dec_com_inst_o
+
 	,output  	dec_ready_o
 );
 
@@ -36,12 +25,6 @@ wire [4:0] com_reg_dr_ow;
 wire [4:0] com_reg_sr1_ow;
 wire [4:0] com_reg_sr2_ow;
 wire [31:0] com_imm_data_ow;
-wire com_int_reg_imm_inst_ow;
-wire com_int_reg_reg_inst_ow;
-wire com_mem_ld_inst_ow;
-wire com_mem_st_inst_ow;
-wire com_jal_inst_ow;
-wire com_con_br_inst_ow;
 wire com_inst_val_ow;
 
 decode_com u_decode_com(
@@ -54,12 +37,6 @@ decode_com u_decode_com(
 	,.com_reg_sr1_o (com_reg_sr1_ow)
 	,.com_reg_sr2_o (com_reg_sr2_ow)
 	,.com_imm_data_o (com_imm_data_ow)
-	,.com_int_reg_imm_inst_o (com_int_reg_imm_inst_ow)
-	,.com_int_reg_reg_inst_o (com_int_reg_reg_inst_ow)
-	,.com_mem_ld_inst_o (com_mem_ld_inst_ow)
-	,.com_mem_st_inst_o (com_mem_st_inst_ow)
-	,.com_jal_inst_o (com_jal_inst_ow)
-	,.com_con_br_inst_o (com_con_br_inst_ow)
 	,.com_inst_val_o (com_inst_val_ow)
 );
 
@@ -78,9 +55,11 @@ wire int_reg_imm_inst_w = (opcode_w[6:0] == 7'b0010011);
 wire int_reg_reg_inst_w = (opcode_w[6:0] == 7'b0110011 & funct7_w != 7'b0000001 );
 wire mem_model_inst_w = (opcode_w[6:0] == 7'b0001111);
 wire env_brkpt_inst_w = (opcode_w[6:0] == 7'b1110011);
-wire csr_inst_w = (opcode_w[6:0] == 7'b1110011) & (funct3_w[2] == 1'b0);
 wire csr_imm_inst_w = (opcode_w[6:0] == 7'b1110011) & (funct3_w[2] == 1'b1);
 wire muldiv_inst_w = (opcode_w[6:0] == 7'b0110011) & (funct7_w == 7'b0000001);
+wire ecall_inst_w = (opcode_w[6:0] == 7'b1110011) & (dec_inst_i[31:7] == 25'h00);
+wire mret_inst_w = (opcode_w[6:0] == 7'b1110011) & (funct7_w == 7'b0011000) & (dec_inst_i[24:20] == 5'b00010) & (dec_inst_i[19:7] == 13'h00);
+wire csr_inst_w = (opcode_w[6:0] == 7'b1110011) & (funct3_w[2] == 1'b0) & !mret_inst_w;
 
 wire reg_sr1_w = (jalr_inst_w
 		| con_br_inst_w
@@ -110,7 +89,7 @@ wire reg_dr_w = (lui_inst_w
 		| muldiv_inst_w
 		);
 
-wire valid_inst = lui_inst_w
+wire valid_inst = (lui_inst_w
 		| auipc_inst_w
 		| jal_inst_w
 		| jalr_inst_w
@@ -122,7 +101,10 @@ wire valid_inst = lui_inst_w
 		| mem_model_inst_w
 		| csr_inst_w
 		| csr_imm_inst_w
-		| muldiv_inst_w;
+		| muldiv_inst_w
+		| ecall_inst_w
+		| mret_inst_w
+		);
 
 reg [4:0]	dec_reg_dr_or;
 reg [4:0]	dec_reg_sr1_or;
@@ -145,53 +127,6 @@ always @(posedge clk_i) begin
 		else dec_reg_sr2_or <= #1 5'h0;
 		if (csr_inst_w | csr_imm_inst_w) dec_csr_addr_o <= #1 dec_inst_i[31:20];
 		else dec_csr_addr_o <= #1 12'h00;
-	end
-end
-
-reg dec_lui_inst_or;
-reg dec_auipc_inst_or;
-reg dec_jal_inst_or;
-reg dec_jalr_inst_or;
-reg dec_con_br_inst_or;
-reg dec_mem_ld_inst_or;
-reg dec_mem_st_inst_or;
-reg dec_int_reg_imm_inst_or;
-reg dec_int_reg_reg_inst_or;
-reg dec_mem_model_inst_or;
-reg dec_csr_inst_or;
-reg dec_csr_imm_inst_or;
-reg dec_muldiv_inst_or;
-
-always @(posedge clk_i) begin
-	if (rst_i) begin
-		dec_lui_inst_or <= #1 0;
-		dec_auipc_inst_or <= #1 0;
-		dec_jal_inst_or <= #1 0;
-		dec_jalr_inst_or <= #1 0;
-		dec_con_br_inst_or <= #1 0;
-		dec_mem_ld_inst_or <= #1 0;
-		dec_mem_st_inst_or <= #1 0;
-		dec_int_reg_imm_inst_or <= #1 0;
-		dec_int_reg_reg_inst_or <= #1 0;
-		dec_mem_model_inst_or <= #1 0;
-		dec_csr_inst_or <= #1 0;
-		dec_csr_imm_inst_or <= #1 0;
-		dec_muldiv_inst_or <= #1 0;
-	end
-	else begin
-		dec_lui_inst_or <= #1 lui_inst_w;
-		dec_auipc_inst_or <= #1 auipc_inst_w;
-		dec_jal_inst_or <= #1 jal_inst_w;
-		dec_jalr_inst_or <= #1 jalr_inst_w;
-		dec_con_br_inst_or <= #1 con_br_inst_w;
-		dec_mem_ld_inst_or <= #1 mem_ld_inst_w;
-		dec_mem_st_inst_or <= #1 mem_st_inst_w;
-		dec_int_reg_imm_inst_or <= #1 int_reg_imm_inst_w;
-		dec_int_reg_reg_inst_or <= #1 int_reg_reg_inst_w;
-		dec_mem_model_inst_or <= #1 mem_model_inst_w;
-		dec_csr_inst_or <= #1 csr_inst_w;
-		dec_csr_imm_inst_or <= #1 csr_imm_inst_w;
-		dec_muldiv_inst_or <= #1 muldiv_inst_w;
 	end
 end
 
@@ -471,6 +406,16 @@ always @(posedge clk_i) begin
 		dec_imm_data_or <= #1 32'h00;
 		inst_name <= #1 "REMU";
 	end
+	else if (ecall_inst_w) begin
+		dec_inst_or <= #1 `ECALL;	// ECALL
+		dec_imm_data_or <= #1 32'h00;
+		inst_name <= #1 "ECALL";
+	end
+	else if (mret_inst_w) begin
+		dec_inst_or <= #1 `MRET;	// MRET
+		dec_imm_data_or <= #1 32'h00;
+		inst_name <= #1 "MRET";
+	end
 	else begin
 		dec_inst_or <= #1 8'h0;
 		dec_imm_data_or <= #1 32'h0;
@@ -485,20 +430,7 @@ wire [4:0] dec_reg_sr2_o = (com_inst_val_ow) ? com_reg_sr2_ow : dec_reg_sr2_or;
 wire [31:0] dec_imm_data_o = (com_inst_val_ow) ? com_imm_data_ow : dec_imm_data_or;
 
 wire dec_com_inst_o = com_inst_val_ow;
-wire dec_ready_o = valid_inst | com_inst_val_ow;
 
-wire dec_lui_inst_o = dec_lui_inst_or;
-wire dec_auipc_inst_o = dec_auipc_inst_or;
-wire dec_jal_inst_o = dec_jal_inst_or | com_jal_inst_ow;
-wire dec_jalr_inst_o = dec_jalr_inst_or;
-wire dec_con_br_inst_o = dec_con_br_inst_or | com_con_br_inst_ow;
-wire dec_mem_ld_inst_o = dec_mem_ld_inst_or | com_mem_ld_inst_ow;
-wire dec_mem_st_inst_o = dec_mem_st_inst_or | com_mem_st_inst_ow;
-wire dec_int_reg_imm_inst_o = dec_int_reg_imm_inst_or | com_int_reg_imm_inst_ow;
-wire dec_int_reg_reg_inst_o = dec_int_reg_reg_inst_or | com_int_reg_reg_inst_ow;
-wire dec_mem_model_inst_o = dec_mem_model_inst_or;
-wire dec_csr_inst_o = dec_csr_inst_or;
-wire dec_csr_imm_inst_o = dec_csr_imm_inst_or;
-wire dec_muldiv_inst_o = dec_muldiv_inst_or;
+wire dec_ready_o = valid_inst | com_inst_val_ow;
 	
 endmodule

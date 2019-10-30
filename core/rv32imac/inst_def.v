@@ -57,6 +57,9 @@
 `define	CSRRSI	8'h84
 `define	CSRRCI	8'h85
 
+`define ECALL	8'h86
+`define MRET	8'h87
+
 `define MUL	8'h90
 `define MULH	8'h91
 `define MULHU	8'h92

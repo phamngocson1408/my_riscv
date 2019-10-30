@@ -13,12 +13,6 @@ module decode_com
 	,output [4:0]	com_reg_sr1_o
 	,output [4:0]	com_reg_sr2_o
 	,output [31:0] 	com_imm_data_o
-	,output  	com_mem_ld_inst_o
-	,output  	com_mem_st_inst_o
-	,output  	com_int_reg_imm_inst_o
-	,output  	com_int_reg_reg_inst_o
-	,output  	com_jal_inst_o
-	,output  	com_con_br_inst_o
 	,output  	com_inst_val_o
 );
 
@@ -248,38 +242,6 @@ always @(posedge clk_i) begin
 		else com_reg_sr1_o <= #1 5'h0;
 		if (reg_sr2_val_w) com_reg_sr2_o <= #1 reg_sr2_w;
 		else com_reg_sr2_o <= #1 5'h0;
-	end
-end
-
-reg com_mem_ld_inst_o;
-reg com_mem_st_inst_o;
-reg com_int_reg_imm_inst_o;
-reg com_int_reg_reg_inst_o;
-reg com_cnop_inst_o;
-reg com_clui_inst_o;
-reg com_jal_inst_o;
-reg com_con_br_inst_o;
-
-always @(posedge clk_i) begin
-	if (rst_i) begin
-		com_mem_ld_inst_o <= #1 0;
-		com_mem_st_inst_o <= #1 0;
-		com_int_reg_imm_inst_o <= #1 0;
-		com_int_reg_reg_inst_o <= #1 0;
-		com_cnop_inst_o <= #1 0;
-		com_clui_inst_o <= #1 0;
-		com_jal_inst_o <= #1 0;
-		com_con_br_inst_o <= #1 0;
-	end
-	else begin
-		com_mem_ld_inst_o <= #1 com_mem_ld_inst_w;
-		com_mem_st_inst_o <= #1 com_mem_st_inst_w;
-		com_int_reg_imm_inst_o <= #1 com_int_reg_imm_inst_w;
-		com_int_reg_reg_inst_o <= #1 com_int_reg_reg_inst_w;
-		com_cnop_inst_o <= #1 cnop_inst_w;
-		com_clui_inst_o <= #1 clui_inst_w;
-		com_jal_inst_o <= #1 com_jal_inst_w;
-		com_con_br_inst_o <= #1 com_con_br_inst_w;
 	end
 end
 
