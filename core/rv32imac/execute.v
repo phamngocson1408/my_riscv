@@ -8,6 +8,7 @@ module execute
 	,input 		en_i
 	,input [7:0]	exe_inst_i
 	,input [4:0] 	exe_reg_dr_i
+	,input [4:0] 	exe_reg_sr1_i
 	,input [31:0] 	exe_imm_data_i
 	,input [31:0] 	exe_csr_data_i
 	,input [11:0] 	exe_csr_addr_i
@@ -15,6 +16,7 @@ module execute
 	,input [31:0]	exe_reg1_data_i
 	,input [31:0]	exe_reg2_data_i
 	,input [31:0]	exe_pc_i
+	,input 		exe_exception_i
 
 	// Output
 	,output		exe_mem_wr_en_o
@@ -52,6 +54,7 @@ wire jal_inst_w = (exe_inst_i == `JAL)
 wire jalr_inst_w = (exe_inst_i == `JALR);
 wire con_br_inst_w = (exe_inst_i == `BEQ)
 		| (exe_inst_i == `CBEQZ)
+		| (exe_inst_i == `CBNEZ)
 		| (exe_inst_i == `BNE)
 		| (exe_inst_i == `BLT)
 		| (exe_inst_i == `BLTU)
@@ -339,14 +342,18 @@ always @(posedge clk_i) begin
 			pc_r <= #1 exe_reg1_data_i;
 			pc_update_r <= #1 1;
 		end
-		else if (exe_inst_i == `ECALL) begin					
+		else if (exe_exception_i) begin					
 			pc_r <= #1 exe_csr_data_i;
 			pc_update_r <= #1 1;
 		end
-		else if (exe_inst_i == `MRET) begin		
-			pc_r <= #1 exe_csr_data_i;
-			pc_update_r <= #1 1;
-		end
+//		else if (exe_inst_i == `MRET) begin		
+//			pc_r <= #1 exe_csr_data_i;
+//			pc_update_r <= #1 1;
+//		end
+//		else if (exe_inst_i == `ILLEGAL) begin		
+//			pc_r <= #1 exe_csr_data_i;
+//			pc_update_r <= #1 1;
+//		end
 		else begin
 			pc_r <= #1 32'h00;
 			pc_update_r <= #1 0;
@@ -401,17 +408,17 @@ always @(posedge clk_i) begin
 	end
 	else if (en_i) begin
 		if (exe_inst_i == `CSRRW) begin					// CSRRW
-			csr_wr_en_r <= #1 1;
+			csr_wr_en_r <= #1 (exe_reg_sr1_i) ? 1 : 0;
 			csr_data_r <= #1 exe_reg1_data_i;
 			csr_addr_r <= #1 exe_csr_addr_i;
 		end
 		else if (exe_inst_i == `CSRRS) begin					// CSRRS
-			csr_wr_en_r <= #1 1;
+			csr_wr_en_r <= #1 (exe_reg_sr1_i) ? 1 : 0;
 			csr_data_r <= #1 (exe_reg1_data_i | exe_csr_data_i);
 			csr_addr_r <= #1 exe_csr_addr_i;
 		end
 		else if (exe_inst_i == `CSRRC) begin					// CSRRC
-			csr_wr_en_r <= #1 1;
+			csr_wr_en_r <= #1 (exe_reg_sr1_i) ? 1 : 0;
 			csr_data_r <= #1 (!exe_reg1_data_i & exe_csr_addr_i);
 			csr_addr_r <= #1 exe_csr_addr_i;
 		end

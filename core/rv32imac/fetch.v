@@ -8,6 +8,8 @@ module fetch
 	,input 		fet_pc_update_i
 	,input [31:0] 	fet_pc_i
 	,input  	com_inst_i
+	,input  	csr_exception_i
+	,input [31:0] 	csr_pc_i
 
 	// Output
 	,output [31:0] 	fet_pc_o
@@ -29,6 +31,7 @@ wire [32:0] fet_pc_4_w = (com_inst_i) ? fet_pc_r + 2
 parameter ROM_ORI = 'h0_0000;
 always @(posedge clk_i) begin
 	if (rst_i) fet_pc_r <= #1 ROM_ORI;
+	else if (csr_exception_i) fet_pc_r <= #1 csr_pc_i;
 	else if (fet_pc_update_i & en_i) fet_pc_r <= #1 fet_pc_i;
 	else if (start_r & en_i) fet_pc_r <= #1 fet_pc_4_w[31:0];
 end

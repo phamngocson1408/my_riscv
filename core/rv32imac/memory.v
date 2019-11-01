@@ -14,6 +14,7 @@ module memory
 	// Output
 	,output [31:0] 	rom_data_o
 	,output [31:0] 	ram_rd_data_o
+	,output 	mem_inst_addr_mis_o
 );
 
 // ROM
@@ -64,5 +65,7 @@ wire [31:0] rom_addr_3 = rom_addr_i + 3;
 wire [31:0] rom_data_o = (!rst_i) ? {ROM[rom_addr_3], ROM[rom_addr_2], ROM[rom_addr_1], ROM[rom_addr_i]} : 32'h00;
 
 wire [31:0] ram_rd_data_o = (!rst_i && ram_rd_en_i) ? {RAM[ram_rd_addr_3], RAM[ram_rd_addr_2], RAM[ram_rd_addr_1], RAM[ram_rd_addr_w]} : 32'h00;
+
+wire mem_inst_addr_mis_o = (rom_addr_i >= ROM_LEN + ROM_ORI) | (rom_addr_i < ROM_ORI);
 
 endmodule

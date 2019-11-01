@@ -59,6 +59,7 @@
 
 `define ECALL	8'h86
 `define MRET	8'h87
+`define URET	8'h88
 
 `define MUL	8'h90
 `define MULH	8'h91
@@ -101,3 +102,5 @@
 `define CJALR	8'hb7
 `define CBEQZ	8'hb8
 `define CBNEZ	8'hb9
+
+`define ILLEGAL	8'hff

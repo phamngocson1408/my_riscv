@@ -104,7 +104,7 @@ wire valid_inst = (lui_inst_w
 		| muldiv_inst_w
 		| ecall_inst_w
 		| mret_inst_w
-		);
+		) && (dec_inst_i != `ILLEGAL);
 
 reg [4:0]	dec_reg_dr_or;
 reg [4:0]	dec_reg_sr1_or;
@@ -417,9 +417,9 @@ always @(posedge clk_i) begin
 		inst_name <= #1 "MRET";
 	end
 	else begin
-		dec_inst_or <= #1 8'h0;
+		dec_inst_or <= #1 `ILLEGAL;
 		dec_imm_data_or <= #1 32'h0;
-		inst_name <= #1 "000";
+		inst_name <= #1 "ILLEGAL";
 	end
 end
 

@@ -10,6 +10,7 @@ module core
 );
 
 wire [31:0] 	mem_data_ow;
+wire 	 	mem_inst_addr_mis_ow;
 wire [31:0] 	reg1_data_ow;
 wire [31:0] 	reg2_data_ow;
 wire [31:0] 	pc_in_w;
@@ -47,11 +48,13 @@ wire 		wrbk_mem_wr_en_ow;
 wire [31:0] 	wrbk_mem_data_ow;
 wire [31:0] 	wrbk_mem_addr_ow;
 wire [11:0]	dec_csr_addr_ow;
-wire [31:0]	csr_data_ow;
 wire 		wrbk_csr_wr_en_ow;
 wire [31:0]	wrbk_csr_data_ow;
 wire [11:0]	wrbk_csr_addr_ow;
 wire		wrbk_ready_ow;
+
+wire [31:0]	csr_data_ow;
+wire 		csr_exception_ow;
 
 
 //-------------------------------------------------------------
@@ -66,6 +69,8 @@ wire state_3 = state == 2'h3;
 always @(posedge clk_i) begin
 	if (rst_i)
 		state <= #1 2'h0;
+	else if (csr_exception_ow)
+		state <= #1 2'h1;
 	else if (state_0 && fet_ready_ow)
 		state <= #1 2'h1;
 	else if (state_1 && dec_ready_ow)
@@ -80,7 +85,7 @@ end
 // Initiate memory
 //-------------------------------------------------------------
 
-//wire [31:0] mem_addr_iw =  (state_3) ? wrbk_mem_addr_ow
+//wire [31:0] rom_addr_iw =  (csr_exception_ow) ? csr_data_ow
 //			: fet_pc_ow;
 
 memory u_memory
@@ -98,6 +103,7 @@ memory u_memory
 	// Output
 	,.rom_data_o (mem_data_ow)
 	,.ram_rd_data_o (mem_ld_data_ow)
+	,.mem_inst_addr_mis_o (mem_inst_addr_mis_ow)
 );
 
 //-------------------------------------------------------------
@@ -121,21 +127,24 @@ reg_file u_reg_file
 );
 
 //-------------------------------------------------------------
-// Initiate csr
+// Initiate csr_ctrl
 //-------------------------------------------------------------
 
-csr u_csr
+csr_ctrl u_csr_ctrl
 (
 	// Input
 	 .rst_i (rst_i)
 	,.clk_i (clk_i)
+	,.en_i (state_2)
 	,.csr_addr_i (dec_csr_addr_ow)
 	,.csr_wr_en_i (wrbk_csr_wr_en_ow)
 	,.csr_data_i (wrbk_csr_data_ow)
 	,.csr_inst_i (dec_inst_ow)
+	,.csr_inst_addr_mis_i (mem_inst_addr_mis_ow)
 
 	// Output
 	,.csr_data_o (csr_data_ow)
+	,.csr_exception_o (csr_exception_ow)
 );
 
 //-------------------------------------------------------------
@@ -151,6 +160,8 @@ fetch u_fetch
 	,.fet_pc_update_i (exe_pc_update_ow)
 	,.fet_pc_i (exe_pc_ow)
 	,.com_inst_i (dec_com_inst_ow)
+	,.csr_exception_i (csr_exception_ow)
+	,.csr_pc_i (csr_data_ow)
 	
 	// Output
 	,.fet_pc_o (fet_pc_ow)
@@ -195,6 +206,7 @@ execute u_execute
 	,.en_i (state_2)
 	,.exe_inst_i (dec_inst_ow)
 	,.exe_reg_dr_i (dec_reg_dr_ow)
+	,.exe_reg_sr1_i (dec_reg_sr1_ow)
 	,.exe_imm_data_i (dec_imm_data_ow)
 	,.exe_csr_data_i (csr_data_ow)
 	,.exe_csr_addr_i (dec_csr_addr_ow)
@@ -202,6 +214,7 @@ execute u_execute
 	,.exe_reg1_data_i (reg1_data_ow)
 	,.exe_reg2_data_i (reg2_data_ow)
 	,.exe_pc_i (fet_pc_ow)
+	,.exe_exception_i (csr_exception_ow)
 
 	// Output
 	,.exe_mem_wr_en_o (exe_mem_wr_en_ow)

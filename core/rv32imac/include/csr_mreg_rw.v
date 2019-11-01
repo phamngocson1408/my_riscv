@@ -1,22 +1,3 @@
-`timescale 1ns / 10ps
-`include "inst_def.v"
-module csr
-(
-	// Input
-	 input rst_i
-	,input clk_i
-	,input [11:0] 	csr_addr_i
-	,input 		csr_wr_en_i
-	,input [31:0] 	csr_data_i
-	,input [7:0] 	csr_inst_i
-	
-	// Output
-	,output [31:0] 	csr_data_o
-);
-
-// Input CSR instructions
-wire ecall_inst_w = (csr_inst_i == `ECALL);
-wire mret_inst_w = (csr_inst_i == `MRET);
 
 // Supervisor Trap Setup
 wire stvec_w 	= csr_addr_i == 12'h105;
@@ -26,47 +7,47 @@ wire satp_w 	= csr_addr_i == 12'h180;
 
 // Machine Information Registers
 wire mvendorid_w 	= csr_addr_i == 12'hf11;
-wire marchid_w	= csr_addr_i == 12'hf12;
-wire mimpid_w 	= csr_addr_i == 12'hf13;
-wire mhartid_w 	= csr_addr_i == 12'hf14;	
+wire marchid_w		= csr_addr_i == 12'hf12;
+wire mimpid_w 		= csr_addr_i == 12'hf13;
+wire mhartid_w 		= csr_addr_i == 12'hf14;	
 
 // Machine Trap Setup
-wire mstatus_w 	= csr_addr_i == 12'h300;
-wire misa_w 	= csr_addr_i == 12'h301;
-wire medeleg_w 	= csr_addr_i == 12'h302;
-wire mideleg_w 	= csr_addr_i == 12'h303;
-wire mie_w 	= csr_addr_i == 12'h304;
-wire mtvec_w 	= (csr_addr_i == 12'h305) | ecall_inst_w;
+wire mstatus_w 		= csr_addr_i == 12'h300;
+wire misa_w 		= csr_addr_i == 12'h301;
+wire medeleg_w 		= csr_addr_i == 12'h302;
+wire mideleg_w 		= csr_addr_i == 12'h303;
+wire mie_w 		= csr_addr_i == 12'h304;
+wire mtvec_w 		= (csr_addr_i == 12'h305) | mcall;
 wire mcounteren_w 	= csr_addr_i == 12'h306;
 
 // Machine Trap Handling
 wire mscratch_w 	= csr_addr_i == 12'h340;
-wire mepc_w 	= (csr_addr_i == 12'h341) | mret_inst_w;
-wire mcause_w 	= csr_addr_i == 12'h342;
-wire mtval_w 	= csr_addr_i == 12'h343;
-wire mip_w 	= csr_addr_i == 12'h344;
+wire mepc_w 		= (csr_addr_i == 12'h341) | mret_inst_w;
+wire mcause_w 		= csr_addr_i == 12'h342;
+wire mtval_w 		= csr_addr_i == 12'h343;
+wire mip_w 		= csr_addr_i == 12'h344;
 
 // Machine Memory Protection
-wire pmpcfg0_w 	= csr_addr_i == 12'h3a0;
-wire pmpcfg1_w 	= csr_addr_i == 12'h3a1;
-wire pmpcfg2_w 	= csr_addr_i == 12'h3a2;
-wire pmpcfg3_w 	= csr_addr_i == 12'h3a3;
-wire pmpaddr0_w = csr_addr_i == 12'h3b0;
-wire pmpaddr1_w = csr_addr_i == 12'h3b1;
-wire pmpaddr2_w = csr_addr_i == 12'h3b2;
-wire pmpaddr3_w = csr_addr_i == 12'h3b3;
-wire pmpaddr4_w = csr_addr_i == 12'h3b4;
-wire pmpaddr5_w = csr_addr_i == 12'h3b5;
-wire pmpaddr6_w = csr_addr_i == 12'h3b6;
-wire pmpaddr7_w = csr_addr_i == 12'h3b7;
-wire pmpaddr8_w = csr_addr_i == 12'h3b8;
-wire pmpaddr9_w = csr_addr_i == 12'h3b9;
-wire pmpaddr10_w = csr_addr_i == 12'h3ba;
-wire pmpaddr11_w = csr_addr_i == 12'h3bb;
-wire pmpaddr12_w = csr_addr_i == 12'h3bc;
-wire pmpaddr13_w = csr_addr_i == 12'h3bd;
-wire pmpaddr14_w = csr_addr_i == 12'h3be;
-wire pmpaddr15_w = csr_addr_i == 12'h3bf;
+wire pmpcfg0_w 		= csr_addr_i == 12'h3a0;
+wire pmpcfg1_w 		= csr_addr_i == 12'h3a1;
+wire pmpcfg2_w 		= csr_addr_i == 12'h3a2;
+wire pmpcfg3_w 		= csr_addr_i == 12'h3a3;
+wire pmpaddr0_w 	= csr_addr_i == 12'h3b0;
+wire pmpaddr1_w 	= csr_addr_i == 12'h3b1;
+wire pmpaddr2_w 	= csr_addr_i == 12'h3b2;
+wire pmpaddr3_w 	= csr_addr_i == 12'h3b3;
+wire pmpaddr4_w 	= csr_addr_i == 12'h3b4;
+wire pmpaddr5_w 	= csr_addr_i == 12'h3b5;
+wire pmpaddr6_w 	= csr_addr_i == 12'h3b6;
+wire pmpaddr7_w 	= csr_addr_i == 12'h3b7;
+wire pmpaddr8_w 	= csr_addr_i == 12'h3b8;
+wire pmpaddr9_w 	= csr_addr_i == 12'h3b9;
+wire pmpaddr10_w 	= csr_addr_i == 12'h3ba;
+wire pmpaddr11_w 	= csr_addr_i == 12'h3bb;
+wire pmpaddr12_w 	= csr_addr_i == 12'h3bc;
+wire pmpaddr13_w 	= csr_addr_i == 12'h3bd;
+wire pmpaddr14_w 	= csr_addr_i == 12'h3be;
+wire pmpaddr15_w 	= csr_addr_i == 12'h3bf;
 
 // Machine Counter/Timers
 wire mcycle_w 		= csr_addr_i == 12'hb00;
@@ -338,7 +319,6 @@ always @(posedge clk_i) begin
 		mimpid_r    	<= #1 32'h00;
 		mhartid_r   	<= #1 32'h00;	
 		
-		mstatus_r 	<= #1 32'h00;
 		misa_r    	<= #1 32'h00;
 		medeleg_r 	<= #1 32'h00;
 		mideleg_r 	<= #1 32'h00;
@@ -485,14 +465,13 @@ always @(posedge clk_i) begin
 //		else if (marchid_w		) marchid_r  	<= #1 csr_data_i;
 //		else if (mimpid_w 		) mimpid_r   	<= #1 csr_data_i;
 //		else if (mhartid_w 		) mhartid_r  	<= #1 csr_data_i;      
-//		else if (mstatus_w 		) mstatus_r  	<= #1 csr_data_i;   	
 //		else if (misa_w 		) misa_r     	<= #1 csr_data_i;   	
 		else if (medeleg_w 		) medeleg_r  	<= #1 csr_data_i;   	
 		else if (mideleg_w 		) mideleg_r  	<= #1 csr_data_i;   	
 		else if (mie_w 			) mie_r	     	<= #1 csr_data_i;
 		else if (mtvec_w 		) mtvec_r    	<= #1 csr_data_i;   	
 //		else if (mcounteren_w 		) mcounteren_r	<= #1 csr_data_i;   
-//		else if (mscratch_w 		) mscratch_r 	<= #1 csr_data_i;
+		else if (mscratch_w 		) mscratch_r 	<= #1 csr_data_i;
 		else if (mepc_w 		) mepc_r     	<= #1 csr_data_i;
 //		else if (mcause_w 		) mcause_r   	<= #1 csr_data_i;
 //		else if (mtval_w 		) mtval_r    	<= #1 csr_data_i;
@@ -625,7 +604,7 @@ always @(posedge clk_i) begin
 	end
 end
 
-wire [31:0] csr_data_o =  (stvec_w	) ? stvec_r
+wire [31:0] csr_mreg_o =  (stvec_w	) ? stvec_r
 
 			: (satp_w	) ? satp_r
 
@@ -775,168 +754,3 @@ wire [31:0] csr_data_o =  (stvec_w	) ? stvec_r
 
 			: 32'h00;
 
-//----------------------------------------------------------------------------------
-// Write mcause
-//----------------------------------------------------------------------------------
-always @(posedge clk_i) begin
-	if (rst_i) mcause_r <= #1 32'd00;
-	else if (ecall_inst_w) mcause_r <= #1 11;
-end
-
-// For debug
-reg [63:0] csr_name_r;
-always @(posedge clk_i) begin
-	if (rst_i) csr_name_r <= #1 "000";
-
-	else if (stvec_w	) csr_name_r <= #1 "stvec";
-
-	else if (satp_w		) csr_name_r <= #1 "satp";
-
-	else if (mvendorid_w	) csr_name_r <= #1 "000";
-	else if (marchid_w	) csr_name_r <= #1 "000";
-	else if (mimpid_w 	) csr_name_r <= #1 "000";
-	else if (mhartid_w 	) csr_name_r <= #1 "mhartid";
-
-	else if (mstatus_w 	) csr_name_r <= #1 "000";     	
-	else if (misa_w 	) csr_name_r <= #1 "000";     	
-	else if (medeleg_w 	) csr_name_r <= #1 "medeleg";     	
-	else if (mideleg_w 	) csr_name_r <= #1 "mideleg";     	
-	else if (mie_w 		) csr_name_r <= #1 "mie";     	
-	else if (mtvec_w 	) csr_name_r <= #1 "mtvec";     	
-	else if (mcounteren_w 	) csr_name_r <= #1 "000";	     
-
-	else if (mscratch_w 	) csr_name_r <= #1 "000";
-	else if (mepc_w 	) csr_name_r <= #1 "000";
-	else if (mcause_w 	) csr_name_r <= #1 "000";
-	else if (mtval_w 	) csr_name_r <= #1 "000";
-	else if (mip_w 		) csr_name_r <= #1 "000";
-
-	else if (pmpcfg0_w 	) csr_name_r <= #1 "pmpcfg0";
-	else if (pmpcfg1_w 	) csr_name_r <= #1 "pmpcfg1";
-	else if (pmpcfg2_w 	) csr_name_r <= #1 "pmpcfg2";
-	else if (pmpcfg3_w 	) csr_name_r <= #1 "pmpcfg3";
-	else if (pmpaddr0_w 	) csr_name_r <= #1 "pmpaddr0";
-	else if (pmpaddr1_w 	) csr_name_r <= #1 "pmpaddr1";
-	else if (pmpaddr2_w 	) csr_name_r <= #1 "pmpaddr2";
-	else if (pmpaddr3_w 	) csr_name_r <= #1 "pmpaddr3";
-	else if (pmpaddr4_w 	) csr_name_r <= #1 "pmpaddr4";
-	else if (pmpaddr5_w 	) csr_name_r <= #1 "pmpaddr5";
-	else if (pmpaddr6_w 	) csr_name_r <= #1 "pmpaddr6";
-	else if (pmpaddr7_w 	) csr_name_r <= #1 "pmpaddr7";
-	else if (pmpaddr8_w 	) csr_name_r <= #1 "pmpaddr8";
-	else if (pmpaddr9_w 	) csr_name_r <= #1 "pmpaddr9";
-	else if (pmpaddr10_w 	) csr_name_r <= #1 "pmpaddr10";
-	else if (pmpaddr11_w 	) csr_name_r <= #1 "pmpaddr11";
-	else if (pmpaddr12_w 	) csr_name_r <= #1 "pmpaddr12";
-	else if (pmpaddr13_w 	) csr_name_r <= #1 "pmpaddr13";
-	else if (pmpaddr14_w 	) csr_name_r <= #1 "pmpaddr14";
-	else if (pmpaddr15_w 	) csr_name_r <= #1 "pmpaddr15";
-
-	else if (mcycle_w 		) csr_name_r <= #1 "000";
-	else if (minstret_w 		) csr_name_r <= #1 "000";
-	else if (mhpmcounter3_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter4_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter5_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter6_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter7_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter8_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter9_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter10_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter11_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter12_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter13_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter14_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter15_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter16_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter17_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter18_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter19_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter20_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter21_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter22_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter23_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter24_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter25_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter26_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter27_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter28_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter29_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter30_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter31_w 	) csr_name_r <= #1 "000";
-	else if (mcycleh_w	 	) csr_name_r <= #1 "000";
-	else if (minstreth_w 		) csr_name_r <= #1 "000";
-	else if (mhpmcounter3h_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter4h_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter5h_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter6h_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter7h_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter8h_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter9h_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter10h_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter11h_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter12h_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter13h_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter14h_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter15h_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter16h_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter17h_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter18h_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter19h_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter20h_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter21h_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter22h_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter23h_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter24h_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter25h_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter26h_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter27h_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter28h_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter29h_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter30h_w 	) csr_name_r <= #1 "000";
-	else if (mhpmcounter31h_w 	) csr_name_r <= #1 "000";
-
-	else if (mcountinhibit_w 	) csr_name_r <= #1 "000";
-	else if (mhpmevent3_w 		) csr_name_r <= #1 "000";
-	else if (mhpmevent4_w 		) csr_name_r <= #1 "000";
-	else if (mhpmevent5_w 		) csr_name_r <= #1 "000";
-	else if (mhpmevent6_w 		) csr_name_r <= #1 "000";
-	else if (mhpmevent7_w 		) csr_name_r <= #1 "000";
-	else if (mhpmevent8_w 		) csr_name_r <= #1 "000";
-	else if (mhpmevent9_w 		) csr_name_r <= #1 "000";
-	else if (mhpmevent10_w 		) csr_name_r <= #1 "000";
-	else if (mhpmevent11_w 		) csr_name_r <= #1 "000";
-	else if (mhpmevent12_w 		) csr_name_r <= #1 "000";
-	else if (mhpmevent13_w 		) csr_name_r <= #1 "000";
-	else if (mhpmevent14_w 		) csr_name_r <= #1 "000";
-	else if (mhpmevent15_w 		) csr_name_r <= #1 "000";
-	else if (mhpmevent16_w 		) csr_name_r <= #1 "000";
-	else if (mhpmevent17_w 		) csr_name_r <= #1 "000";
-	else if (mhpmevent18_w 		) csr_name_r <= #1 "000";
-	else if (mhpmevent19_w 		) csr_name_r <= #1 "000";
-	else if (mhpmevent20_w 		) csr_name_r <= #1 "000";
-	else if (mhpmevent21_w 		) csr_name_r <= #1 "000";
-	else if (mhpmevent22_w 		) csr_name_r <= #1 "000";
-	else if (mhpmevent23_w 		) csr_name_r <= #1 "000";
-	else if (mhpmevent24_w 		) csr_name_r <= #1 "000";
-	else if (mhpmevent25_w 		) csr_name_r <= #1 "000";
-	else if (mhpmevent26_w 		) csr_name_r <= #1 "000";
-	else if (mhpmevent27_w 		) csr_name_r <= #1 "000";
-	else if (mhpmevent28_w 		) csr_name_r <= #1 "000";
-	else if (mhpmevent29_w 		) csr_name_r <= #1 "000";
-	else if (mhpmevent30_w 		) csr_name_r <= #1 "000";
-	else if (mhpmevent31_w 		) csr_name_r <= #1 "000";
-
-	else if (tselect_w		) csr_name_r <= #1 "000";
-	else if (tdata1_w		) csr_name_r <= #1 "000";
-	else if (tdata2_w		) csr_name_r <= #1 "000";
-	else if (tdata3_w		) csr_name_r <= #1 "000";
-
-	else if (dcsr_w	 		) csr_name_r <= #1 "000";
-	else if (dpc_w	 		) csr_name_r <= #1 "000";
-	else if (dscratch0_w 		) csr_name_r <= #1 "000";
-	else if (dscratch1_w 		) csr_name_r <= #1 "000";
-
-	else csr_name_r <= #1 "000";
-end
-
-endmodule
