@@ -17,7 +17,7 @@ wire misa_w 		= csr_addr_i == 12'h301;
 wire medeleg_w 		= csr_addr_i == 12'h302;
 wire mideleg_w 		= csr_addr_i == 12'h303;
 wire mie_w 		= csr_addr_i == 12'h304;
-wire mtvec_w 		= (csr_addr_i == 12'h305) | mcall;
+wire mtvec_w 		= (csr_addr_i == 12'h305) | mtrap_w;
 wire mcounteren_w 	= csr_addr_i == 12'h306;
 
 // Machine Trap Handling
@@ -167,7 +167,7 @@ reg [31:0] marchid_r   ;
 reg [31:0] mimpid_r    ;
 reg [31:0] mhartid_r   ;	
 
-reg [31:0] mstatus_r ;
+//reg [31:0] mstatus_r ;
 reg [31:0] misa_r    ;
 reg [31:0] medeleg_r ;
 reg [31:0] mideleg_r ;
@@ -202,8 +202,8 @@ reg [31:0] pmpaddr13_r 	;
 reg [31:0] pmpaddr14_r 	;
 reg [31:0] pmpaddr15_r 	;
 
-reg [31:0] mcycle_r 		;
-reg [31:0] minstret_r 		;
+//reg [31:0] mcycle_r 		;
+//reg [31:0] minstret_r 	;
 reg [31:0] mhpmcounter3_r 	;
 reg [31:0] mhpmcounter4_r 	;
 reg [31:0] mhpmcounter5_r 	;
@@ -233,8 +233,8 @@ reg [31:0] mhpmcounter28_r 	;
 reg [31:0] mhpmcounter29_r 	;
 reg [31:0] mhpmcounter30_r 	;
 reg [31:0] mhpmcounter31_r 	;
-reg [31:0] mcycleh_r	 	;
-reg [31:0] minstreth_r 		;
+//reg [31:0] mcycleh_r	 	;
+//reg [31:0] minstreth_r 	;
 reg [31:0] mhpmcounter3h_r 	;
 reg [31:0] mhpmcounter4h_r 	;
 reg [31:0] mhpmcounter5h_r 	;
@@ -319,7 +319,7 @@ always @(posedge clk_i) begin
 		mimpid_r    	<= #1 32'h00;
 		mhartid_r   	<= #1 32'h00;	
 		
-		misa_r    	<= #1 32'h00;
+		misa_r    	<= #1 MISA_VALUE;
 		medeleg_r 	<= #1 32'h00;
 		mideleg_r 	<= #1 32'h00;
 		mie_r     	<= #1 32'h00;
@@ -327,7 +327,7 @@ always @(posedge clk_i) begin
 		mcounteren_r 	<= #1 32'h00;
 		
 		mscratch_r 	<= #1 32'h00;
-		mepc_r     	<= #1 32'h00; 
+//		mepc_r     	<= #1 32'h00; 
 		mtval_r    	<= #1 32'h00;
 		mip_r      	<= #1 32'h00;
 		
@@ -352,8 +352,8 @@ always @(posedge clk_i) begin
 		pmpaddr14_r 	<= #1 32'h00;
 		pmpaddr15_r 	<= #1 32'h00;
 		
-		mcycle_r 		<= #1 32'h00;
-		minstret_r 		<= #1 32'h00;
+//		mcycle_r 		<= #1 32'h00;
+//		minstret_r 		<= #1 32'h00;
 		mhpmcounter3_r 		<= #1 32'h00;
 		mhpmcounter4_r 		<= #1 32'h00;
 		mhpmcounter5_r 		<= #1 32'h00;
@@ -383,8 +383,8 @@ always @(posedge clk_i) begin
 		mhpmcounter29_r 	<= #1 32'h00;
 		mhpmcounter30_r 	<= #1 32'h00;
 		mhpmcounter31_r 	<= #1 32'h00;
-		mcycleh_r	 	<= #1 32'h00;
-		minstreth_r 		<= #1 32'h00;
+//		mcycleh_r	 	<= #1 32'h00;
+//		minstreth_r 		<= #1 32'h00;
 		mhpmcounter3h_r 	<= #1 32'h00;
 		mhpmcounter4h_r 	<= #1 32'h00;
 		mhpmcounter5h_r 	<= #1 32'h00;
@@ -465,14 +465,14 @@ always @(posedge clk_i) begin
 //		else if (marchid_w		) marchid_r  	<= #1 csr_data_i;
 //		else if (mimpid_w 		) mimpid_r   	<= #1 csr_data_i;
 //		else if (mhartid_w 		) mhartid_r  	<= #1 csr_data_i;      
-//		else if (misa_w 		) misa_r     	<= #1 csr_data_i;   	
+		else if (misa_w 		) misa_r     	<= #1 csr_data_i;   	
 		else if (medeleg_w 		) medeleg_r  	<= #1 csr_data_i;   	
 		else if (mideleg_w 		) mideleg_r  	<= #1 csr_data_i;   	
 		else if (mie_w 			) mie_r	     	<= #1 csr_data_i;
 		else if (mtvec_w 		) mtvec_r    	<= #1 csr_data_i;   	
 //		else if (mcounteren_w 		) mcounteren_r	<= #1 csr_data_i;   
 		else if (mscratch_w 		) mscratch_r 	<= #1 csr_data_i;
-		else if (mepc_w 		) mepc_r     	<= #1 csr_data_i;
+//		else if (mepc_w 		) mepc_r     	<= #1 csr_data_i;
 //		else if (mcause_w 		) mcause_r   	<= #1 csr_data_i;
 //		else if (mtval_w 		) mtval_r    	<= #1 csr_data_i;
 //		else if (mip_w 			) mip_r	     	<= #1 csr_data_i;
@@ -613,7 +613,7 @@ wire [31:0] csr_mreg_o =  (stvec_w	) ? stvec_r
 			: (mimpid_w 	) ? mimpid_r
 			: (mhartid_w 	) ? mhartid_r	
 			                    	          
-			: (mstatus_w 	) ? mstatus_r	     	
+			: (mstatus_w 	) ? mstatus_r & MSTATUS_RD_MASK	     	
 			: (misa_w 	) ? misa_r	     	
 			: (medeleg_w 	) ? medeleg_r	     	
 			: (mideleg_w 	) ? mideleg_r	     	
@@ -648,8 +648,8 @@ wire [31:0] csr_mreg_o =  (stvec_w	) ? stvec_r
 			: (pmpaddr14_w 	) ? pmpaddr14_r
 			: (pmpaddr15_w 	) ? pmpaddr15_r
 			
-			: (mcycle_w 		) ? mcycle_r
-			: (minstret_w 		) ? minstret_r
+			: (mcycle_w 		) ? cycle_r
+			: (minstret_w 		) ? instret_r
 			: (mhpmcounter3_w 	) ? mhpmcounter3_r
 			: (mhpmcounter4_w 	) ? mhpmcounter4_r
 			: (mhpmcounter5_w 	) ? mhpmcounter5_r
@@ -679,8 +679,8 @@ wire [31:0] csr_mreg_o =  (stvec_w	) ? stvec_r
 			: (mhpmcounter29_w 	) ? mhpmcounter29_r
 			: (mhpmcounter30_w 	) ? mhpmcounter30_r
 			: (mhpmcounter31_w 	) ? mhpmcounter31_r
-			: (mcycleh_w	 	) ? mcycleh_r
-			: (minstreth_w 		) ? minstreth_r
+			: (mcycleh_w	 	) ? cycleh_r
+			: (minstreth_w 		) ? instreth_r
 			: (mhpmcounter3h_w 	) ? mhpmcounter3h_r
 			: (mhpmcounter4h_w 	) ? mhpmcounter4h_r
 			: (mhpmcounter5h_w 	) ? mhpmcounter5h_r

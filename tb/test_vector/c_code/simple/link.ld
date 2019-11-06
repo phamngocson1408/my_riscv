@@ -1,8 +1,8 @@
 OUTPUT_ARCH( "riscv" )
 MEMORY
 {
- rom (r) : ORIGIN = 0x00000, LENGTH = 1M
- ram (rwx) : ORIGIN = 0x200000, LENGTH = 1M
+ rom (r) : ORIGIN = 0x00000000, LENGTH = 1M
+ ram (rwx) : ORIGIN = 0x00100000, LENGTH = 1M
 }
 SECTIONS
 {

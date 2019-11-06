@@ -6,8 +6,8 @@ Disassembly of section .text:
 
 00000000 <_start>:
    0:	00000093          	li	ra,0
-   4:	00300117          	auipc	sp,0x300
-   8:	ffc10113          	addi	sp,sp,-4 # 300000 <_stack_top>
+   4:	00200117          	auipc	sp,0x200
+   8:	ffc10113          	addi	sp,sp,-4 # 200000 <_stack_top>
    c:	00000193          	li	gp,0
   10:	00000213          	li	tp,0
   14:	00000293          	li	t0,0
@@ -78,7 +78,7 @@ Disassembly of section .text:
  100:	00112e23          	sw	ra,28(sp)
  104:	00812c23          	sw	s0,24(sp)
  108:	02010413          	addi	s0,sp,32
- 10c:	00200793          	li	a5,2
+ 10c:	03200793          	li	a5,50
  110:	fef42223          	sw	a5,-28(s0)
  114:	fe442503          	lw	a0,-28(s0)
  118:	f6dff0ef          	jal	ra,84 <fact>

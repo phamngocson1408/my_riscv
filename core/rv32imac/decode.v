@@ -59,6 +59,7 @@ wire csr_imm_inst_w = (opcode_w[6:0] == 7'b1110011) & (funct3_w[2] == 1'b1);
 wire muldiv_inst_w = (opcode_w[6:0] == 7'b0110011) & (funct7_w == 7'b0000001);
 wire ecall_inst_w = (opcode_w[6:0] == 7'b1110011) & (dec_inst_i[31:7] == 25'h00);
 wire mret_inst_w = (opcode_w[6:0] == 7'b1110011) & (funct7_w == 7'b0011000) & (dec_inst_i[24:20] == 5'b00010) & (dec_inst_i[19:7] == 13'h00);
+wire uret_inst_w = (opcode_w[6:0] == 7'b1110011) & (funct7_w == 7'b000_0000) & (dec_inst_i[24:20] == 5'b00010) & (dec_inst_i[19:7] == 13'h00);
 wire csr_inst_w = (opcode_w[6:0] == 7'b1110011) & (funct3_w[2] == 1'b0) & !mret_inst_w;
 
 wire reg_sr1_w = (jalr_inst_w
@@ -104,7 +105,8 @@ wire valid_inst = (lui_inst_w
 		| muldiv_inst_w
 		| ecall_inst_w
 		| mret_inst_w
-		) && (dec_inst_i != `ILLEGAL);
+		| (dec_inst_o == `ILLEGAL)
+		);
 
 reg [4:0]	dec_reg_dr_or;
 reg [4:0]	dec_reg_sr1_or;
@@ -415,6 +417,11 @@ always @(posedge clk_i) begin
 		dec_inst_or <= #1 `MRET;	// MRET
 		dec_imm_data_or <= #1 32'h00;
 		inst_name <= #1 "MRET";
+	end
+	else if (uret_inst_w) begin
+		dec_inst_or <= #1 `URET;	// URET
+		dec_imm_data_or <= #1 32'h00;
+		inst_name <= #1 "URET";
 	end
 	else begin
 		dec_inst_or <= #1 `ILLEGAL;

@@ -1,5 +1,6 @@
 `timescale 1ns / 10ps
 `include "inst_def.v"
+`include "mem_def.v"
 module execute
 (
 	// Input
@@ -16,7 +17,7 @@ module execute
 	,input [31:0]	exe_reg1_data_i
 	,input [31:0]	exe_reg2_data_i
 	,input [31:0]	exe_pc_i
-	,input 		exe_exception_i
+	,input 		exe_trap_i
 
 	// Output
 	,output		exe_mem_wr_en_o
@@ -79,7 +80,7 @@ wire exe_mem_ld_en_o = (exe_inst_i == `LB)
 			| (exe_inst_i == `CLWSP)
 			| (exe_inst_i == `CLW)
 			;
-wire [31:0] exe_mem_ld_addr_o = exe_reg1_data_i + exe_imm_data_i;
+wire [31:0] exe_mem_ld_addr_o = (exe_reg1_data_i + exe_imm_data_i);
 
 // Integer Register Immediate Instruction
 wire int_reg_imm_inst_w = (exe_inst_i == `ADDI)
@@ -305,6 +306,10 @@ always @(posedge clk_i) begin
 		pc_r <= #1 32'h00;
 		pc_update_r <= #1 0;
 	end
+	else if (exe_trap_i) begin					
+		pc_r <= #1 exe_csr_data_i;
+		pc_update_r <= #1 1;
+	end
 	else if (en_i) begin
 		if (exe_inst_i == `BEQ | exe_inst_i == `CBEQZ) begin		
 			if (exe_reg1_data_i == exe_reg2_data_i) begin
@@ -342,18 +347,6 @@ always @(posedge clk_i) begin
 			pc_r <= #1 exe_reg1_data_i;
 			pc_update_r <= #1 1;
 		end
-		else if (exe_exception_i) begin					
-			pc_r <= #1 exe_csr_data_i;
-			pc_update_r <= #1 1;
-		end
-//		else if (exe_inst_i == `MRET) begin		
-//			pc_r <= #1 exe_csr_data_i;
-//			pc_update_r <= #1 1;
-//		end
-//		else if (exe_inst_i == `ILLEGAL) begin		
-//			pc_r <= #1 exe_csr_data_i;
-//			pc_update_r <= #1 1;
-//		end
 		else begin
 			pc_r <= #1 32'h00;
 			pc_update_r <= #1 0;
@@ -362,7 +355,7 @@ always @(posedge clk_i) begin
 end
 
 // Output to memory
-wire [32:0]	mem_addr_w = exe_reg1_data_i + exe_imm_data_i;
+wire [32:0]	mem_addr_w = (exe_reg1_data_i + exe_imm_data_i);
 reg		mem_wr_en_r;
 reg [31:0]	mem_data_or;
 reg [31:0]	mem_addr_r;
@@ -466,7 +459,7 @@ wire [4:0] exe_reg_addr_o = reg_addr_or;
 
 // Output to PC
 wire exe_pc_update_o = pc_update_r;
-wire [31:0] exe_pc_o = pc_r;
+wire [31:0] exe_pc_o = pc_r | `ROM_ORI;
 
 // Output to csr
 wire exe_csr_wr_en_o = csr_wr_en_r;

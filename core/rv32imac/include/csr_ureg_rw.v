@@ -2,7 +2,7 @@
 // User Trap Setup
 wire ustatus_w 		= csr_addr_i == 12'h000;
 wire uie_w 		= csr_addr_i == 12'h004;
-wire utvec_w 		=(csr_addr_i == 12'h005) | ucall;
+wire utvec_w 		=(csr_addr_i == 12'h005) | udes_w;
 
 // User Trap Handling
 wire uscratch_w 	= csr_addr_i == 12'h040;
@@ -77,7 +77,7 @@ wire hpmcounter29h_w 	= csr_addr_i == 12'hc9d;
 wire hpmcounter30h_w 	= csr_addr_i == 12'hc9e;
 wire hpmcounter31h_w 	= csr_addr_i == 12'hc9f;
 
-reg [31:0] ustatus_r ;
+//reg [31:0] ustatus_r ;
 reg [31:0] uie_r     ;
 reg [31:0] utvec_r   ;
 
@@ -87,9 +87,9 @@ reg [31:0] ucause_r   ;
 reg [31:0] utval_r    ;
 reg [31:0] uip_r      ;
 
-reg [31:0] cycle_r 		;
-reg [31:0] time_r 		;
-reg [31:0] instret_r 		;
+//reg [31:0] cycle_r 		;
+//reg [31:0] time_r 		;
+//reg [31:0] instret_r 		;
 reg [31:0] hpmcounter3_r 	;
 reg [31:0] hpmcounter4_r 	;
 reg [31:0] hpmcounter5_r 	;
@@ -119,9 +119,9 @@ reg [31:0] hpmcounter28_r 	;
 reg [31:0] hpmcounter29_r 	;
 reg [31:0] hpmcounter30_r 	;
 reg [31:0] hpmcounter31_r 	;
-reg [31:0] cycleh_r	 	;
-reg [31:0] timeh_r	 	;
-reg [31:0] instreth_r 		;
+//reg [31:0] cycleh_r	 	;
+//reg [31:0] timeh_r	 	;
+//reg [31:0] instreth_r 	;
 reg [31:0] hpmcounter3h_r 	;
 reg [31:0] hpmcounter4h_r 	;
 reg [31:0] hpmcounter5h_r 	;
@@ -154,7 +154,7 @@ reg [31:0] hpmcounter31h_r 	;
 
 always @(posedge clk_i) begin
 	if (rst_i) begin
-		ustatus_r     	<= #1 32'h00;
+//		ustatus_r     	<= #1 32'h00;
 		uie_r     	<= #1 32'h00;
 		utvec_r   	<= #1 32'h00;
 		
@@ -164,9 +164,6 @@ always @(posedge clk_i) begin
 		utval_r    	<= #1 32'h00;
 		uip_r      	<= #1 32'h00;
 		
-		cycle_r 	<= #1 32'h00;
-		time_r	 	<= #1 32'h00;
-		instret_r 	<= #1 32'h00;
 		hpmcounter3_r 	<= #1 32'h00;
 		hpmcounter4_r 	<= #1 32'h00;
 		hpmcounter5_r 	<= #1 32'h00;
@@ -196,8 +193,6 @@ always @(posedge clk_i) begin
 		hpmcounter29_r 	<= #1 32'h00;
 		hpmcounter30_r 	<= #1 32'h00;
 		hpmcounter31_r 	<= #1 32'h00;
-		cycleh_r	<= #1 32'h00;
-		instreth_r 	<= #1 32'h00;
 		hpmcounter3h_r 	<= #1 32'h00;
 		hpmcounter4h_r 	<= #1 32'h00;
 		hpmcounter5h_r 	<= #1 32'h00;
@@ -229,8 +224,8 @@ always @(posedge clk_i) begin
 		hpmcounter31h_r <= #1 32'h00;
 	end
 	else if (csr_wr_en_i) begin
-		if (ustatus_w		) ustatus_r		<= #1 csr_data_i;
-		else if (uie_w 		) uie_r	     		<= #1 csr_data_i;
+//		if (ustatus_w		) ustatus_r		<= #1 csr_data_i;
+		if (uie_w 		) uie_r	     		<= #1 csr_data_i;
 		else if (utvec_w 	) utvec_r    		<= #1 csr_data_i;   	
 
 		else if (uscratch_w 	) uscratch_r 		<= #1 csr_data_i;
@@ -306,7 +301,7 @@ always @(posedge clk_i) begin
 	end
 end
 
-wire [31:0] csr_ureg_o =  (ustatus_w	) ? ustatus_r
+wire [31:0] csr_ureg_o =  (ustatus_w	) ? mstatus_r & USTATUS_RD_MASK
 			: (uie_w 	) ? uie_r	     	
 			: (utvec_w 	) ? utvec_r	     	
 			

@@ -10,7 +10,7 @@ module core
 );
 
 wire [31:0] 	mem_data_ow;
-wire 	 	mem_inst_addr_mis_ow;
+wire 	 	exc_inst_addr_mis_ow;
 wire [31:0] 	reg1_data_ow;
 wire [31:0] 	reg2_data_ow;
 wire [31:0] 	pc_in_w;
@@ -54,7 +54,15 @@ wire [11:0]	wrbk_csr_addr_ow;
 wire		wrbk_ready_ow;
 
 wire [31:0]	csr_data_ow;
-wire 		csr_exception_ow;
+wire 		csr_trap_ow;
+
+wire		timer_wr_en_ow;
+wire [19:0]	timer_wr_addr_ow;	
+wire [31:0]	timer_wr_data_ow;	
+wire     	timer_rd_en_ow;
+wire [19:0]	timer_rd_addr_ow;	
+wire [31:0]	timer_rd_data_ow;	
+wire  		int_timer_ow;	
 
 
 //-------------------------------------------------------------
@@ -69,7 +77,7 @@ wire state_3 = state == 2'h3;
 always @(posedge clk_i) begin
 	if (rst_i)
 		state <= #1 2'h0;
-	else if (csr_exception_ow)
+	else if (csr_trap_ow)
 		state <= #1 2'h1;
 	else if (state_0 && fet_ready_ow)
 		state <= #1 2'h1;
@@ -88,22 +96,28 @@ end
 //wire [31:0] rom_addr_iw =  (csr_exception_ow) ? csr_data_ow
 //			: fet_pc_ow;
 
-memory u_memory
+memory_top u_memory_top
 (
 	// Input
 	 .rst_i (rst_i)
 	,.clk_i (clk_i)
-	,.rom_addr_i (fet_pc_ow)
-	,.ram_wr_en_i (wrbk_mem_wr_en_ow)
-	,.ram_wr_addr_i (wrbk_mem_addr_ow)
-	,.ram_wr_data_i (wrbk_mem_data_ow)
-	,.ram_rd_en_i (exe_mem_ld_en_ow)
-	,.ram_rd_addr_i (exe_mem_ld_addr_ow)
+	,.fet_addr_i (fet_pc_ow)
+	,.mem_wr_en_i (wrbk_mem_wr_en_ow)
+	,.mem_wr_addr_i (wrbk_mem_addr_ow)
+	,.mem_wr_data_i (wrbk_mem_data_ow)
+	,.mem_rd_en_i (exe_mem_ld_en_ow)
+	,.mem_rd_addr_i (exe_mem_ld_addr_ow)
 
 	// Output
-	,.rom_data_o (mem_data_ow)
-	,.ram_rd_data_o (mem_ld_data_ow)
-	,.mem_inst_addr_mis_o (mem_inst_addr_mis_ow)
+	,.fet_data_o (mem_data_ow)
+	,.mem_rd_data_o (mem_ld_data_ow)
+	,.timer_wr_en_o (timer_wr_en_ow)
+	,.timer_wr_addr_o (timer_wr_addr_ow)	
+	,.timer_wr_data_o (timer_wr_data_ow)	
+	,.timer_rd_en_o (timer_rd_en_ow)
+	,.timer_rd_addr_o (timer_rd_addr_ow)	
+	,.timer_rd_data_i (timer_rd_data_ow)	
+
 );
 
 //-------------------------------------------------------------
@@ -140,11 +154,13 @@ csr_ctrl u_csr_ctrl
 	,.csr_wr_en_i (wrbk_csr_wr_en_ow)
 	,.csr_data_i (wrbk_csr_data_ow)
 	,.csr_inst_i (dec_inst_ow)
-	,.csr_inst_addr_mis_i (mem_inst_addr_mis_ow)
+	,.exc_inst_addr_mis_i (exc_inst_addr_mis_ow)
+	,.int_timer_i (int_timer_ow)
+	,.fet_pc_i (fet_pc_ow)
 
 	// Output
 	,.csr_data_o (csr_data_ow)
-	,.csr_exception_o (csr_exception_ow)
+	,.csr_trap_o (csr_trap_ow)
 );
 
 //-------------------------------------------------------------
@@ -160,11 +176,12 @@ fetch u_fetch
 	,.fet_pc_update_i (exe_pc_update_ow)
 	,.fet_pc_i (exe_pc_ow)
 	,.com_inst_i (dec_com_inst_ow)
-	,.csr_exception_i (csr_exception_ow)
+	,.csr_trap_i (csr_trap_ow)
 	,.csr_pc_i (csr_data_ow)
 	
 	// Output
 	,.fet_pc_o (fet_pc_ow)
+	,.exc_inst_addr_mis_o (exc_inst_addr_mis_ow)
 	,.fet_ready_o (fet_ready_ow)
 );
 
@@ -214,7 +231,7 @@ execute u_execute
 	,.exe_reg1_data_i (reg1_data_ow)
 	,.exe_reg2_data_i (reg2_data_ow)
 	,.exe_pc_i (fet_pc_ow)
-	,.exe_exception_i (csr_exception_ow)
+	,.exe_trap_i (csr_trap_ow)
 
 	// Output
 	,.exe_mem_wr_en_o (exe_mem_wr_en_ow)
@@ -272,5 +289,23 @@ wrbk u_wrbk
 	,.wrbk_ready_o (wrbk_ready_ow)
 );
 
+//-------------------------------------------------------------
+// Initiate timer
+//-------------------------------------------------------------
+timer u_timer
+(
+	// Input
+	 .rst_i (rst_i)
+	,.clk_i (clk_i)
+	,.timer_wr_en_i (timer_wr_en_ow)
+	,.timer_wr_addr_i (timer_wr_addr_ow)
+	,.timer_wr_data_i (timer_wr_data_ow)
+	,.timer_rd_en_i (timer_rd_en_ow)
+	,.timer_rd_addr_i (timer_rd_addr_ow)
+
+	// Output
+	,.timer_rd_data_o (timer_rd_data_ow)
+	,.int_timer_o (int_timer_ow)
+);
 
 endmodule
