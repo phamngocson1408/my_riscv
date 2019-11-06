@@ -6,7 +6,7 @@
 `define S_MODE	2'b01
 `define U_MODE	2'b00
 
-// Traps Define
+// MCAUSE Define
 `define INST_ADDR_MIS	0
 `define INST_ACC_FAULT	1
 `define ILL_INST	2
@@ -18,6 +18,9 @@
 `define ECALL_H_MODE	10
 `define ECALL_M_MODE	11
 `define MTIMER_INT	32'h8000_0007
+
+// MIE define
+`define MIE_MTIE	7
 
 // STATUS register fiels
 `define	MSTATUS_SD	31

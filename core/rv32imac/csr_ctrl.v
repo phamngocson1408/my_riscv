@@ -16,19 +16,34 @@ module csr_ctrl
 	,input [31:0] 	fet_pc_i
 	
 	// Output
-	,output [31:0] 	csr_data_o
-	,output 	csr_trap_o
+	,output		csr_trap_o
+	,output		csr_pc_wr_en_o
+	,output	[31:0]	csr_pc_o
+	,output	[31:0]	csr_data_o
 );
 
 // Input CSR instructions
 wire mret_inst_w = (csr_inst_i == `MRET);
 wire uret_inst_w = (csr_inst_i == `URET);
+
 // Exception
 wire inst_addr_mis_w;
 wire ill_inst_w;
 wire mcall_inst_w;
 wire ucall_inst_w;
-// Excaption Delegation
+
+// Exeption delegation
+wire mexception_w;
+wire uexception_w;
+
+// Interrupt
+wire int_timer_w;
+
+// Interrupt delegation
+wire minterrupt_w;
+wire uinterrupt_w;
+
+// Trap delegation
 wire mtrap_w;
 wire utrap_w;
 
@@ -70,30 +85,61 @@ assign ill_inst_w = ((csr_inst_i == `ILLEGAL) && en_i)
 assign mcall_inst_w = (csr_inst_i == `ECALL) && (current_mode_r == `M_MODE) && en_i;
 assign ucall_inst_w = (csr_inst_i == `ECALL) && (current_mode_r == `U_MODE) && en_i;
 
-wire csr_exception_w = (inst_addr_mis_w
-		| ill_inst_w
-		| mcall_inst_w
-		| ucall_inst_w
-		);
-	
-wire csr_interrupt_w = (int_timer_i && (mstatus_r[`MSTATUS_MIE])
-			);
-
-wire csr_trap_o = csr_exception_w | csr_interrupt_w;
-
 //----------------------------------------------------------------------------------
 // Exception Delegation
 //----------------------------------------------------------------------------------
-assign mtrap_w = (ucall_inst_w && (medeleg_r[`ECALL_U_MODE] == 0))
+/* Incase N extension is implemented
+assign mexception_w = (ucall_inst_w && (medeleg_r[`ECALL_U_MODE] == 0))
 		| (ill_inst_w && (medeleg_r[`ILL_INST] == 0))
 		| (inst_addr_mis_w && (medeleg_r[`INST_ADDR_MIS] == 0))
 		| mcall_inst_w
-		| (int_timer_i && mstatus_r[`MSTATUS_MIE])
 		;
-assign utrap_w = ucall_inst_w && (medeleg_r[`ECALL_U_MODE] == 1)
+
+assign uexception_w = ucall_inst_w && (medeleg_r[`ECALL_U_MODE] == 1)
 		| (ill_inst_w && (medeleg_r[`ILL_INST] == 1))
 		| (inst_addr_mis_w && (medeleg_r[`INST_ADDR_MIS] == 1))
 		;
+*/
+assign mexception_w = ucall_inst_w 
+		| ill_inst_w 
+		| inst_addr_mis_w 
+		| mcall_inst_w
+		;
+assign uexception_w = 0;
+//----------------------------------------------------------------------------------
+// Interrupt
+//----------------------------------------------------------------------------------
+assign int_timer_w = ( (int_timer_i && (current_mode_r == `U_MODE))
+			| (int_timer_i && (current_mode_r == `M_MODE) && (mstatus_r[`MSTATUS_MIE] == 1))
+			);
+//----------------------------------------------------------------------------------
+// Interrupt delegation
+//----------------------------------------------------------------------------------
+/* Incase N extension is implemented
+assign minterrupt_w = ( int_timer_w && (mideleg_r[`MIE_MTIE] == 0)
+			);
+
+assign uinterrupt_w = ( int_timer_w && (mideleg_r[`MIE_MTIE] == 1)
+			);
+*/
+assign minterrupt_w = ( int_timer_w 
+			);
+assign uinterrupt_w = 0;
+//----------------------------------------------------------------------------------
+// Trap
+//----------------------------------------------------------------------------------
+assign mtrap_w = mexception_w | minterrupt_w;
+assign utrap_w = uexception_w | uinterrupt_w;
+
+wire csr_trap_o = mtrap_w | utrap_w;
+
+wire csr_pc_wr_en_o = csr_trap_o;
+
+wire [31:0] csr_pc_o = (mtrap_w) ? mtvec_r
+			: (utrap_w) ? utvec_r
+			: (mret_inst_w) ? mepc_r
+			: (uret_inst_w) ? uepc_r
+			: 32'h00;
 
 //----------------------------------------------------------------------------------
 // Current Mode
@@ -151,11 +197,13 @@ end
 //----------------------------------------------------------------------------------
 always @(posedge clk_i) begin
 	if (rst_i) mcause_r <= #1 32'd00;
-	else if (inst_addr_mis_w) mcause_r <= #1 `INST_ADDR_MIS;
-	else if (ill_inst_w) mcause_r <= #1 `ILL_INST;
-	else if (ucall_inst_w) mcause_r <= #1 `ECALL_U_MODE;
-	else if (mcall_inst_w) mcause_r <= #1 `ECALL_M_MODE;
-	else if (int_timer_i) mcause_r <= #1 `MTIMER_INT;
+	else if (mtrap_w) begin
+		if (inst_addr_mis_w) mcause_r <= #1 `INST_ADDR_MIS;
+		else if (ill_inst_w) mcause_r <= #1 `ILL_INST;
+		else if (ucall_inst_w) mcause_r <= #1 `ECALL_U_MODE;
+		else if (mcall_inst_w) mcause_r <= #1 `ECALL_M_MODE;
+		else if (int_timer_i) mcause_r <= #1 `MTIMER_INT;
+	end
 end
 
 //----------------------------------------------------------------------------------

@@ -17,12 +17,12 @@ wire misa_w 		= csr_addr_i == 12'h301;
 wire medeleg_w 		= csr_addr_i == 12'h302;
 wire mideleg_w 		= csr_addr_i == 12'h303;
 wire mie_w 		= csr_addr_i == 12'h304;
-wire mtvec_w 		= (csr_addr_i == 12'h305) | mtrap_w;
+wire mtvec_w 		= (csr_addr_i == 12'h305);
 wire mcounteren_w 	= csr_addr_i == 12'h306;
 
 // Machine Trap Handling
 wire mscratch_w 	= csr_addr_i == 12'h340;
-wire mepc_w 		= (csr_addr_i == 12'h341) | mret_inst_w;
+wire mepc_w 		= (csr_addr_i == 12'h341);
 wire mcause_w 		= csr_addr_i == 12'h342;
 wire mtval_w 		= csr_addr_i == 12'h343;
 wire mip_w 		= csr_addr_i == 12'h344;

@@ -53,8 +53,10 @@ wire [31:0]	wrbk_csr_data_ow;
 wire [11:0]	wrbk_csr_addr_ow;
 wire		wrbk_ready_ow;
 
-wire [31:0]	csr_data_ow;
 wire 		csr_trap_ow;
+wire 		csr_pc_wr_en_ow;
+wire [31:0]	csr_pc_ow;
+wire [31:0]	csr_data_ow;
 
 wire		timer_wr_en_ow;
 wire [19:0]	timer_wr_addr_ow;	
@@ -159,8 +161,10 @@ csr_ctrl u_csr_ctrl
 	,.fet_pc_i (fet_pc_ow)
 
 	// Output
-	,.csr_data_o (csr_data_ow)
 	,.csr_trap_o (csr_trap_ow)
+	,.csr_pc_wr_en_o (csr_pc_wr_en_ow)
+	,.csr_pc_o (csr_pc_ow)
+	,.csr_data_o (csr_data_ow)
 );
 
 //-------------------------------------------------------------
@@ -176,8 +180,8 @@ fetch u_fetch
 	,.fet_pc_update_i (exe_pc_update_ow)
 	,.fet_pc_i (exe_pc_ow)
 	,.com_inst_i (dec_com_inst_ow)
-	,.csr_trap_i (csr_trap_ow)
-	,.csr_pc_i (csr_data_ow)
+	,.csr_pc_wr_en_i (csr_pc_wr_en_ow)
+	,.csr_pc_i (csr_pc_ow)
 	
 	// Output
 	,.fet_pc_o (fet_pc_ow)
@@ -231,7 +235,7 @@ execute u_execute
 	,.exe_reg1_data_i (reg1_data_ow)
 	,.exe_reg2_data_i (reg2_data_ow)
 	,.exe_pc_i (fet_pc_ow)
-	,.exe_trap_i (csr_trap_ow)
+//	,.exe_trap_i (csr_trap_ow)
 
 	// Output
 	,.exe_mem_wr_en_o (exe_mem_wr_en_ow)

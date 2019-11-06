@@ -35,5 +35,14 @@
 	1.	Complete RV32IMC
 	2.	Compact the source code
 3.	Todo:
-	1.	Make atomic structures			
+	1.	Make atomic structures		
 	2.	Comlete priviledge modes
+----------------------------------------------------------------
+191106----------------------------------------------------------
+----------------------------------------------------------------
+1.	This version is created on 191106
+2.	Features:
+	1. Almost comple user and machine modes
+3.	Todo:
+	1. Comple all priviledge modes
+	2. Make atomic extension

@@ -2,11 +2,11 @@
 // User Trap Setup
 wire ustatus_w 		= csr_addr_i == 12'h000;
 wire uie_w 		= csr_addr_i == 12'h004;
-wire utvec_w 		=(csr_addr_i == 12'h005) | udes_w;
+wire utvec_w 		=(csr_addr_i == 12'h005);
 
 // User Trap Handling
 wire uscratch_w 	= csr_addr_i == 12'h040;
-wire uepc_w 		=(csr_addr_i == 12'h041) | uret_inst_w;
+wire uepc_w 		=(csr_addr_i == 12'h041);
 wire ucause_w 		= csr_addr_i == 12'h042;
 wire utval_w 		= csr_addr_i == 12'h043;
 wire uip_w 		= csr_addr_i == 12'h044;

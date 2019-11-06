@@ -30,7 +30,7 @@ wire mtimecmp_rd_w = timer_rd_en_i && (timer_rd_addr_i == 20'h04);
 reg [5:0] clk_timer;
 always @(posedge clk_i) begin
 	if (rst_i) begin
-		clk_timer <= #1 0;
+		clk_timer <= #1 1;
 	end
 	else clk_timer <= #1 clk_timer + 1;
 end

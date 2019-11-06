@@ -17,7 +17,7 @@ module execute
 	,input [31:0]	exe_reg1_data_i
 	,input [31:0]	exe_reg2_data_i
 	,input [31:0]	exe_pc_i
-	,input 		exe_trap_i
+//	,input 		exe_trap_i
 
 	// Output
 	,output		exe_mem_wr_en_o
@@ -306,10 +306,10 @@ always @(posedge clk_i) begin
 		pc_r <= #1 32'h00;
 		pc_update_r <= #1 0;
 	end
-	else if (exe_trap_i) begin					
-		pc_r <= #1 exe_csr_data_i;
-		pc_update_r <= #1 1;
-	end
+//	else if (exe_trap_i) begin					
+//		pc_r <= #1 exe_csr_data_i;
+//		pc_update_r <= #1 1;
+//	end
 	else if (en_i) begin
 		if (exe_inst_i == `BEQ | exe_inst_i == `CBEQZ) begin		
 			if (exe_reg1_data_i == exe_reg2_data_i) begin
