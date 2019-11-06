@@ -1,10 +1,4 @@
 
-// Supervisor Trap Setup
-wire stvec_w 	= csr_addr_i == 12'h105;
-
-// Supervisor Protection and Translation
-wire satp_w 	= csr_addr_i == 12'h180;
-
 // Machine Information Registers
 wire mvendorid_w 	= csr_addr_i == 12'hf11;
 wire marchid_w		= csr_addr_i == 12'hf12;
@@ -158,10 +152,6 @@ wire dscratch0_w 	= csr_addr_i == 12'h7b2;
 wire dscratch1_w 	= csr_addr_i == 12'h7b3;
 
 
-reg [31:0] stvec_r ;
-
-reg [31:0] satp_r ;
-
 reg [31:0] mvendorid_r ;
 reg [31:0] marchid_r   ;
 reg [31:0] mimpid_r    ;
@@ -310,10 +300,6 @@ reg		wr_invalid_r;
 
 always @(posedge clk_i) begin
 	if (rst_i) begin
-		stvec_r		<= #1 32'h00;
-
-		satp_r		<= #1 32'h00;
-
 		mvendorid_r 	<= #1 32'h00;
 		marchid_r   	<= #1 32'h00;
 		mimpid_r    	<= #1 32'h00;
@@ -459,13 +445,11 @@ always @(posedge clk_i) begin
 		wr_invalid_r <= #1 0;
 	end
 	else if (csr_wr_en_i) begin
-		if (satp_w			) satp_r	<= #1 csr_data_i;
-		else if (stvec_w		) stvec_r	<= #1 csr_data_i;
 //		else if (mvendorid_w		) mvendorid_r	<= #1 csr_data_i;
 //		else if (marchid_w		) marchid_r  	<= #1 csr_data_i;
 //		else if (mimpid_w 		) mimpid_r   	<= #1 csr_data_i;
 //		else if (mhartid_w 		) mhartid_r  	<= #1 csr_data_i;      
-		else if (misa_w 		) misa_r     	<= #1 csr_data_i;   	
+		if (misa_w 			) misa_r     	<= #1 csr_data_i;   	
 		else if (medeleg_w 		) medeleg_r  	<= #1 csr_data_i;   	
 		else if (mideleg_w 		) mideleg_r  	<= #1 csr_data_i;   	
 		else if (mie_w 			) mie_r	     	<= #1 csr_data_i;
@@ -604,11 +588,8 @@ always @(posedge clk_i) begin
 	end
 end
 
-wire [31:0] csr_mreg_o =  (stvec_w	) ? stvec_r
-
-			: (satp_w	) ? satp_r
-
-			: (mvendorid_w	) ? mvendorid_r
+wire [31:0] csr_mreg_o =  
+			 (mvendorid_w	) ? mvendorid_r
 			: (marchid_w	) ? marchid_r
 			: (mimpid_w 	) ? mimpid_r
 			: (mhartid_w 	) ? mhartid_r	

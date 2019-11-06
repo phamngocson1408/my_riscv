@@ -24,16 +24,19 @@ module csr_ctrl
 
 // Input CSR instructions
 wire mret_inst_w = (csr_inst_i == `MRET);
+wire sret_inst_w = (csr_inst_i == `SRET);
 wire uret_inst_w = (csr_inst_i == `URET);
 
 // Exception
 wire inst_addr_mis_w;
 wire ill_inst_w;
 wire mcall_inst_w;
+wire scall_inst_w;
 wire ucall_inst_w;
 
 // Exeption delegation
 wire mexception_w;
+wire sexception_w;
 wire uexception_w;
 
 // Interrupt
@@ -41,10 +44,12 @@ wire int_timer_w;
 
 // Interrupt delegation
 wire minterrupt_w;
+wire sinterrupt_w;
 wire uinterrupt_w;
 
 // Trap delegation
 wire mtrap_w;
+wire strap_w;
 wire utrap_w;
 
 reg [1:0] current_mode_r;
@@ -58,9 +63,10 @@ reg [31:0] instreth_r;
 reg [31:0] mstatus_r;
 
 `include "csr_ureg_rw.v"
+`include "csr_sreg_rw.v"
 `include "csr_mreg_rw.v"
 
-wire [31:0] csr_data_o = csr_mreg_o | csr_ureg_o;
+wire [31:0] csr_data_o = csr_mreg_o | csr_ureg_o | csr_sreg_o;
 
 //----------------------------------------------------------------------------------
 // Exception
@@ -83,61 +89,70 @@ assign ill_inst_w = ((csr_inst_i == `ILLEGAL) && en_i)
 			| (csr_wr_en_i && csr_inst_rdwr_w == 2'b11)
 			;
 assign mcall_inst_w = (csr_inst_i == `ECALL) && (current_mode_r == `M_MODE) && en_i;
+assign scall_inst_w = (csr_inst_i == `ECALL) && (current_mode_r == `S_MODE) && en_i;
 assign ucall_inst_w = (csr_inst_i == `ECALL) && (current_mode_r == `U_MODE) && en_i;
 
 //----------------------------------------------------------------------------------
 // Exception Delegation
 //----------------------------------------------------------------------------------
-/* Incase N extension is implemented
 assign mexception_w = (ucall_inst_w && (medeleg_r[`ECALL_U_MODE] == 0))
 		| (ill_inst_w && (medeleg_r[`ILL_INST] == 0))
 		| (inst_addr_mis_w && (medeleg_r[`INST_ADDR_MIS] == 0))
 		| mcall_inst_w
 		;
 
-assign uexception_w = ucall_inst_w && (medeleg_r[`ECALL_U_MODE] == 1)
+assign sexception_w = 0;
+
+assign uexception_w = (ucall_inst_w && (medeleg_r[`ECALL_U_MODE] == 1))
 		| (ill_inst_w && (medeleg_r[`ILL_INST] == 1))
 		| (inst_addr_mis_w && (medeleg_r[`INST_ADDR_MIS] == 1))
 		;
-*/
+/*
 assign mexception_w = ucall_inst_w 
 		| ill_inst_w 
 		| inst_addr_mis_w 
 		| mcall_inst_w
 		;
 assign uexception_w = 0;
+*/
 //----------------------------------------------------------------------------------
 // Interrupt
 //----------------------------------------------------------------------------------
 assign int_timer_w = ( (int_timer_i && (current_mode_r == `U_MODE))
+			| (int_timer_i && (current_mode_r == `S_MODE))
 			| (int_timer_i && (current_mode_r == `M_MODE) && (mstatus_r[`MSTATUS_MIE] == 1))
 			);
 //----------------------------------------------------------------------------------
 // Interrupt delegation
 //----------------------------------------------------------------------------------
-/* Incase N extension is implemented
 assign minterrupt_w = ( int_timer_w && (mideleg_r[`MIE_MTIE] == 0)
 			);
 
+assign sinterrupt_w = 0;
+
 assign uinterrupt_w = ( int_timer_w && (mideleg_r[`MIE_MTIE] == 1)
 			);
-*/
+/*
 assign minterrupt_w = ( int_timer_w 
 			);
 assign uinterrupt_w = 0;
+*/
 //----------------------------------------------------------------------------------
 // Trap
 //----------------------------------------------------------------------------------
 assign mtrap_w = mexception_w | minterrupt_w;
+assign strap_w = sexception_w | sinterrupt_w;
 assign utrap_w = uexception_w | uinterrupt_w;
 
-wire csr_trap_o = mtrap_w | utrap_w;
+wire csr_trap_o = mtrap_w | strap_w | utrap_w;
 
 wire csr_pc_wr_en_o = csr_trap_o;
 
 wire [31:0] csr_pc_o = (mtrap_w) ? mtvec_r
+			: (strap_w) ? stvec_r
 			: (utrap_w) ? utvec_r
 			: (mret_inst_w) ? mepc_r
+			: (sret_inst_w) ? sepc_r
 			: (uret_inst_w) ? uepc_r
 			: 32'h00;
 
@@ -169,7 +184,10 @@ always @(posedge clk_i) begin
 	else if (csr_wr_en_i && mstatus_w && current_mode_r == `M_MODE) begin
 		mstatus_r <= #1 csr_data_i & MSTATUS_WR_MASK;   	
 	end	
-	else if (csr_wr_en_i && mstatus_w && current_mode_r == `U_MODE) begin
+	else if (csr_wr_en_i && sstatus_w) begin
+		mstatus_r <= #1 csr_data_i & SSTATUS_WR_MASK;   	
+	end	
+	else if (csr_wr_en_i && ustatus_w) begin
 		mstatus_r <= #1 csr_data_i & USTATUS_WR_MASK;   	
 	end	
 	else if (csr_trap_o) begin
@@ -179,8 +197,8 @@ always @(posedge clk_i) begin
 			mstatus_r[`MSTATUS_MPP] <= #1 current_mode_r;
 		end
 		else if (utrap_w) begin
-//			mstatus_r[`MSTATUS_UPIE] <= #1 mstatus_r[`MSTATUS_UIE];
-//			mstatus_r[`MSTATUS_UIE] <= #1 0;
+			mstatus_r[`MSTATUS_UPIE] <= #1 mstatus_r[`MSTATUS_UIE];
+			mstatus_r[`MSTATUS_UIE] <= #1 0;
 		end
 	end
 	else if (mret_inst_w) begin

@@ -154,7 +154,6 @@ reg [31:0] hpmcounter31h_r 	;
 
 always @(posedge clk_i) begin
 	if (rst_i) begin
-//		ustatus_r     	<= #1 32'h00;
 		uie_r     	<= #1 32'h00;
 		utvec_r   	<= #1 32'h00;
 		
@@ -224,7 +223,6 @@ always @(posedge clk_i) begin
 		hpmcounter31h_r <= #1 32'h00;
 	end
 	else if (csr_wr_en_i) begin
-//		if (ustatus_w		) ustatus_r		<= #1 csr_data_i;
 		if (uie_w 		) uie_r	     		<= #1 csr_data_i;
 		else if (utvec_w 	) utvec_r    		<= #1 csr_data_i;   	
 

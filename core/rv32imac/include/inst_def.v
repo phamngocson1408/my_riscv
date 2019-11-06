@@ -59,7 +59,8 @@
 
 `define ECALL	8'h86
 `define MRET	8'h87
-`define URET	8'h88
+`define SRET	8'h88
+`define URET	8'h89
 
 `define MUL	8'h90
 `define MULH	8'h91

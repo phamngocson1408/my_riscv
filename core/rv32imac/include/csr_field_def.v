@@ -90,6 +90,54 @@ parameter MSTATUS_WR_MASK = {
 			, 1'b0		// UIE
 			};
 
+parameter SSTATUS_RD_MASK = {
+			  1'b1		// SD
+			, 8'h00
+			, 1'b1		// TSR
+			, 1'b1		// TW
+			, 1'b1		// TVM
+			, 1'b1		// MXR
+			, 1'b1		// SUM
+			, 1'b1		// MPRV
+			, 2'b11		// XS
+			, 2'b11		// FS
+			, 2'b11		// MPP
+			, 2'b00
+			, 1'b0		// SPP
+			, 1'b1		// MPIE
+			, 1'b0
+			, 1'b0		// SPIE
+			, 1'b0		// UPIE
+			, 1'b1		// MIE
+			, 1'b0
+			, 1'b0		// SIE
+			, 1'b0		// UIE
+			};
+
+parameter SSTATUS_WR_MASK = {
+			  1'b1		// SD
+			, 8'h00
+			, 1'b1		// TSR
+			, 1'b1		// TW
+			, 1'b1		// TVM
+			, 1'b1		// MXR
+			, 1'b1		// SUM
+			, 1'b1		// MPRV
+			, 2'b11		// XS
+			, 2'b11		// FS
+			, 2'b11		// MPP
+			, 2'b00
+			, 1'b0		// SPP
+			, 1'b1		// MPIE
+			, 1'b0
+			, 1'b0		// SPIE
+			, 1'b0		// UPIE
+			, 1'b1		// MIE
+			, 1'b0
+			, 1'b0		// SIE
+			, 1'b0		// UIE
+			};
+
 parameter USTATUS_RD_MASK = {
 			  1'b1		// SD
 			, 8'h00
@@ -138,13 +186,12 @@ parameter USTATUS_WR_MASK = {
 			, 1'b0		// UIE
 			};
 
-//`define USTATUS_RD_MASK	32'b00000000_00000011_11000000_00010001
-//`define USTATUS_WR_MASK	32'b00000000_00000000_00000000_00010001
 
 // MISA value
 parameter MISA_VALUE = {
 			  2'b01		// 32 bit
-			, 17'h00
+			, 16'h00
+			, 1'b1		// N
 			, 1'b1		// M
 			, 3'h0
 			, 1'b1		// I
